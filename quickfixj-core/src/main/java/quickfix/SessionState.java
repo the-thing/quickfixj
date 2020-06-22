@@ -82,7 +82,7 @@ public final class SessionState {
         this.initiator = initiator;
         this.messageStore = messageStore;
         setHeartBeatInterval(heartBeatInterval);
-        this.log = log == null ? new NullLog() : log;
+        this.log = log == null ? new NoopLog() : log;
         this.testRequestDelayMultiplier = testRequestDelayMultiplier;
         this.heartBeatTimeoutMultiplier = heartBeatTimeoutMultiplier;
     }
@@ -497,23 +497,6 @@ public final class SessionState {
 
     public Object getLock() {
         return lock;
-    }
-
-    private final static class NullLog implements Log {
-        public void onOutgoing(String message) {
-        }
-
-        public void onIncoming(String message) {
-        }
-
-        public void onEvent(String text) {
-        }
-
-        public void onErrorEvent(String text) {
-        }
-
-        public void clear() {
-        }
     }
 
     /**
