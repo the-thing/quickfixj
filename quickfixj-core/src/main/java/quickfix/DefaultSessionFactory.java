@@ -53,20 +53,12 @@ public class DefaultSessionFactory implements SessionFactory {
 
     public DefaultSessionFactory(Application application, MessageStoreFactory messageStoreFactory,
             LogFactory logFactory) {
-        this.application = application;
-        this.messageStoreFactory = messageStoreFactory;
-        this.logFactory = logFactory;
-        this.messageFactory = new DefaultMessageFactory();
-        this.sessionScheduleFactory = new DefaultSessionScheduleFactory();
+        this(application, messageStoreFactory, logFactory, new DefaultMessageFactory());
     }
 
     public DefaultSessionFactory(Application application, MessageStoreFactory messageStoreFactory,
             LogFactory logFactory, MessageFactory messageFactory) {
-        this.application = application;
-        this.messageStoreFactory = messageStoreFactory;
-        this.logFactory = logFactory;
-        this.messageFactory = messageFactory;
-        this.sessionScheduleFactory = new DefaultSessionScheduleFactory();
+        this(application, messageStoreFactory, logFactory, messageFactory, new DefaultSessionScheduleFactory());
     }
 
     public DefaultSessionFactory(Application application, MessageStoreFactory messageStoreFactory,
