@@ -20,7 +20,7 @@
 package quickfix;
 
 /**
- * No operation logger.
+ * No operation logger implementation.
  */
 public final class NoopLog implements Log {
 
