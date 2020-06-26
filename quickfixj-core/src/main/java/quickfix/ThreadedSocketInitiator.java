@@ -52,7 +52,7 @@ public class ThreadedSocketInitiator extends AbstractSocketInitiator {
         }
 
         @Override
-        protected ThreadedSocketInitiator doBuild() throws ConfigError {
+        public ThreadedSocketInitiator build() throws ConfigError {
             return new ThreadedSocketInitiator(this);
         }
     }

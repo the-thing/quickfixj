@@ -34,7 +34,7 @@ public class CompositeLogFactory implements LogFactory {
      * @param logFactories the factories to be used in the composite
      * @see LogFactory
      */
-    public CompositeLogFactory(LogFactory[] logFactories) {
+    public CompositeLogFactory(LogFactory... logFactories) {
         this.logFactories = logFactories;
     }
 

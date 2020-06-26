@@ -19,20 +19,27 @@
 
 package quickfix;
 
-import static org.mockito.Mockito.*;
-import junit.framework.TestCase;
+import org.junit.Test;
 
-public class CompositeLogTest extends TestCase {
-    public void testCompositeLog() throws Exception {
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
+public class CompositeLogTest {
+
+    @Test
+    public void testCompositeLog() {
         Log mockLog1 = mock(Log.class);
         Log mockLog2 = mock(Log.class);
 
-        CompositeLog log = new CompositeLog(new Log[] { mockLog1, mockLog2 });
+        CompositeLog log = new CompositeLog(mockLog1, mockLog2);
         log.setRethrowExceptions(true);
 
         log.onIncoming("INCOMING");
         log.onOutgoing("OUTGOING");
         log.onEvent("EVENT");
+        log.onErrorEvent("ERROR");
+        log.clear();
 
         verify(mockLog1).onIncoming("INCOMING");
         verify(mockLog2).onIncoming("INCOMING");
@@ -40,5 +47,12 @@ public class CompositeLogTest extends TestCase {
         verify(mockLog2).onOutgoing("OUTGOING");
         verify(mockLog1).onEvent("EVENT");
         verify(mockLog2).onEvent("EVENT");
+        verify(mockLog1).clear();
+        verify(mockLog2).clear();
+        verify(mockLog1).onErrorEvent("ERROR");
+        verify(mockLog2).onErrorEvent("ERROR");
+
+        verifyNoMoreInteractions(mockLog1);
+        verifyNoMoreInteractions(mockLog2);
     }
 }

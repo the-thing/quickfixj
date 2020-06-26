@@ -50,19 +50,14 @@ public class SocketInitiator extends AbstractSocketInitiator {
 
     public static final class Builder extends AbstractSessionConnectorBuilder<Builder, SocketInitiator> {
         
-        int numReconnectThreads = 3;
+        protected int numReconnectThreads = 3;
 
-        private Builder() {
+        public Builder() {
             super(Builder.class);
-        }
-        
-        public Builder withReconnectThreads(int numReconnectThreads) throws ConfigError {
-            this.numReconnectThreads = numReconnectThreads;
-            return this;
         }
 
         @Override
-        protected SocketInitiator doBuild() throws ConfigError {
+        public SocketInitiator build() throws ConfigError {
             return new SocketInitiator(this);
         }
     }

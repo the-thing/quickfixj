@@ -361,5 +361,4 @@ public abstract class AbstractSocketAcceptor extends SessionConnector implements
                     sessionID.getTargetCompID());
         }
     }
-
 }

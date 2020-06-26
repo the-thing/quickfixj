@@ -49,12 +49,13 @@ public class SocketAcceptor extends AbstractSocketAcceptor {
     }
 
     public static final class Builder extends AbstractSessionConnectorBuilder<Builder, SocketAcceptor> {
-        private Builder() {
+
+        public Builder() {
             super(Builder.class);
         }
 
         @Override
-        protected SocketAcceptor doBuild() throws ConfigError {
+        public SocketAcceptor build() throws ConfigError {
             return new SocketAcceptor(this);
         }
     }

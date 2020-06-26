@@ -1,57 +1,62 @@
 package quickfix;
 
-public abstract class AbstractSessionConnectorBuilder<Derived, Product> {
-    private final Class<Derived> derived;
-    Application application;
-    MessageStoreFactory messageStoreFactory;
-    SessionSettings settings;
-    LogFactory logFactory;
-    MessageFactory messageFactory;
+import quickfix.mina.SessionConnector;
 
-    int queueCapacity = -1;
-    int queueLowerWatermark = -1;
-    int queueUpperWatermark = -1;
+public abstract class AbstractSessionConnectorBuilder<D extends AbstractSessionConnectorBuilder<D, P>, P extends SessionConnector> {
 
-    AbstractSessionConnectorBuilder(Class<Derived> derived) {
-        this.derived = derived;
+    private final Class<D> derivedType;
+    protected Application application;
+    protected MessageStoreFactory messageStoreFactory;
+    protected SessionSettings settings;
+    protected LogFactory logFactory;
+    protected MessageFactory messageFactory;
+    protected int queueCapacity = -1;
+    protected int queueLowerWatermark = -1;
+    protected int queueUpperWatermark = -1;
+
+    protected AbstractSessionConnectorBuilder(Class<D> derivedType) {
+        this.derivedType = derivedType;
+        this.logFactory = new ScreenLogFactory();
+        this.messageFactory = new DefaultMessageFactory();
     }
 
-    public Derived withApplication(Application val) throws ConfigError {
+    public D withApplication(Application val) {
         application = val;
-        return derived.cast(this);
+        return derivedType.cast(this);
     }
 
-    public Derived withMessageStoreFactory(MessageStoreFactory val) throws ConfigError {
+    public D withMessageStoreFactory(MessageStoreFactory val) {
         messageStoreFactory = val;
-        return derived.cast(this);
+        return derivedType.cast(this);
     }
 
-    public Derived withSettings(SessionSettings val) {
+    public D withSettings(SessionSettings val) {
         settings = val;
-        return derived.cast(this);
+        return derivedType.cast(this);
     }
 
-    public Derived withLogFactory(LogFactory val) throws ConfigError {
+    public D withLogFactory(LogFactory val) {
         logFactory = val;
-        return derived.cast(this);
+        return derivedType.cast(this);
     }
 
-    public Derived withMessageFactory(MessageFactory val) throws ConfigError {
+    public D withMessageFactory(MessageFactory val) {
         messageFactory = val;
-        return derived.cast(this);
+        return derivedType.cast(this);
     }
 
-    public Derived withQueueCapacity(int val) throws ConfigError {
+    public D withQueueCapacity(int val) throws ConfigError {
         if (queueLowerWatermark >= 0) {
             throw new ConfigError("queue capacity and watermarks may not be configured together");
         } else if (val < 0) {
             throw new ConfigError("negative queue capacity");
         }
         queueCapacity = val;
-        return derived.cast(this);
+        return  derivedType.cast(this);
+
     }
 
-    public Derived withQueueWatermarks(int lower, int upper) throws ConfigError {
+    public D withQueueWatermarks(int lower, int upper) throws ConfigError {
         if (queueCapacity >= 0) {
             throw new ConfigError("queue capacity and watermarks may not be configured together");
         } else if (lower < 0 || upper <= lower) {
@@ -59,18 +64,8 @@ public abstract class AbstractSessionConnectorBuilder<Derived, Product> {
         }
         queueLowerWatermark = lower;
         queueUpperWatermark = upper;
-        return derived.cast(this);
+        return derivedType.cast(this);
     }
 
-    public final Product build() throws ConfigError {
-        if (logFactory == null) {
-            logFactory = new ScreenLogFactory(settings);
-        }
-        if (messageFactory == null) {
-            messageFactory = new DefaultMessageFactory();
-        }
-        return doBuild();
-    }
-
-    protected abstract Product doBuild() throws ConfigError;
+    public abstract P build() throws ConfigError;
 }

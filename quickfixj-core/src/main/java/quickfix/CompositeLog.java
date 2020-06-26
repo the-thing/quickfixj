@@ -32,7 +32,7 @@ class CompositeLog implements Log {
     private final Log[] logs;
     private boolean rethrowException;
 
-    public CompositeLog(Log[] logs) {
+    public CompositeLog(Log... logs) {
         this.logs = logs;
     }
 

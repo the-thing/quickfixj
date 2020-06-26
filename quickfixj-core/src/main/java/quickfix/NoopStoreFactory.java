@@ -27,8 +27,10 @@ package quickfix;
  */
 public final class NoopStoreFactory implements MessageStoreFactory {
 
+    private static final MessageStore NOOP_STORE = new NoopStore();
+
     @Override
     public MessageStore create(SessionID sessionID) {
-        return new NoopStore();
+        return NOOP_STORE;
     }
 }

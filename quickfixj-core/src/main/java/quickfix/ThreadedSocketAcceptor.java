@@ -47,12 +47,13 @@ public class ThreadedSocketAcceptor extends AbstractSocketAcceptor {
     }
 
     public static final class Builder extends AbstractSessionConnectorBuilder<Builder, ThreadedSocketAcceptor> {
-        private Builder() {
+
+        public Builder() {
             super(Builder.class);
         }
 
         @Override
-        protected ThreadedSocketAcceptor doBuild() throws ConfigError {
+        public ThreadedSocketAcceptor build() throws ConfigError {
             return new ThreadedSocketAcceptor(this);
         }
     }
