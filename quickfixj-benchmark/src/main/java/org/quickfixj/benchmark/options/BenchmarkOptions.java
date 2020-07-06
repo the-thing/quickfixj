@@ -21,36 +21,35 @@ package org.quickfixj.benchmark.options;
 
 public class BenchmarkOptions {
 
-    private static final BenchmarkProtocol DEFAULT_PROTOCOL = BenchmarkProtocol.SOCKET;
     private static final int DEFAULT_QUEUE_CAPACITY = 4096;
     private static final int DEFAULT_LOWER_WATERMARK = -1;
     private static final int DEFAULT_UPPER_WATERMARK = -1;
-    private static final int DEFAULT_MESSAGE_COUNT = 150_000;
+    private static final int DEFAULT_MESSAGE_COUNT = 200_000;
+    private static final int DEFAULT_SESSION_COUNT = 1;
 
-    private static final String MESSAGE_COUNT_PROPERTY = "benchmark.message.count";
-    private static final String QUEUE_CAPACITY_PROPERTY = "benchmark.queue.capacity";
     // TODO add more
 
-    private BenchmarkProtocol protocol;
+    private String connectionType;
     private int queueCapacity;
     private int queueLowerWatermark;
     private int queueUpperWatermark;
     private int messageCount;
+    private int sessionCount;
 
     public BenchmarkOptions() {
-        this.protocol = BenchmarkProtocol.SOCKET;
         this.queueCapacity = DEFAULT_QUEUE_CAPACITY;
         this.queueLowerWatermark = DEFAULT_LOWER_WATERMARK;
         this.queueUpperWatermark = DEFAULT_UPPER_WATERMARK;
         this.messageCount = DEFAULT_MESSAGE_COUNT;
+        this.sessionCount = DEFAULT_SESSION_COUNT;
     }
 
-    public BenchmarkProtocol getProtocol() {
-        return protocol;
+    public String getConnectionType() {
+        return connectionType;
     }
 
-    public void setProtocol(BenchmarkProtocol protocol) {
-        this.protocol = protocol;
+    public void setConnectionType(String connectionType) {
+        this.connectionType = connectionType;
     }
 
     public int getQueueCapacity() {
@@ -75,5 +74,21 @@ public class BenchmarkOptions {
 
     public void setQueueUpperWatermark(int queueUpperWatermark) {
         this.queueUpperWatermark = queueUpperWatermark;
+    }
+
+    public int getSessionCount() {
+        return sessionCount;
+    }
+
+    public void setSessionCount(int sessionCount) {
+        this.sessionCount = sessionCount;
+    }
+
+    public int getMessageCount() {
+        return messageCount;
+    }
+
+    public void setMessageCount(int messageCount) {
+        this.messageCount = messageCount;
     }
 }

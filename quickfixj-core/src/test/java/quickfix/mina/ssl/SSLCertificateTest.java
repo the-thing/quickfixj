@@ -701,6 +701,7 @@ public class SSLCertificateTest {
         sessionSettings.setString(sessionID, "SenderCompID", "ALFA");
         sessionSettings.setString(sessionID, "TargetCompID", "ZULU");
 
+
         return sessionSettings;
     }
 
