@@ -30,8 +30,10 @@ jobs:
   coverage-report:
     needs: test
     runs-on: ubuntu-18.04
-    name: Report code coverage
-    run: mvn jacoco:report coveralls:report -Droot.logging.level=INFO
+    steps:
+      - uses: coverallsapp/github-action@master
+      - name: Report code coverage
+        run: mvn jacoco:report coveralls:report -Droot.logging.level=INFO
 
 
 
