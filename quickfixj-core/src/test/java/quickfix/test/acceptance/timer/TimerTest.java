@@ -20,9 +20,11 @@
 package quickfix.test.acceptance.timer;
 
 import junit.framework.TestCase;
+import org.junit.Ignore;
 import quickfix.ConfigError;
 import quickfix.SessionNotFound;
 
+@Ignore
 public class TimerTest extends TestCase {
 
     TimerTestServer server;
