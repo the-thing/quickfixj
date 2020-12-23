@@ -402,6 +402,26 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>quickfix/**</include>
+                        <include>org/**</include>
+                        <include>quickfix/field/converter/*</include>
+                    </includes>
+                    <excludes>
+                        <exclude>quickfix/field/*</exclude>
+                        <exclude>quickfix/fix*/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.eluder.coveralls</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
+                <version>${coveralls-maven-plugin-version}</version>
+            </plugin>
         </plugins>
     </build>
 

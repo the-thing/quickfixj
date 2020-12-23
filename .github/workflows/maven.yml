@@ -26,3 +26,10 @@ jobs:
         env:
           MAVEN_OPTS: "-Xms3g -Xmx3g"
         run: mvn test -B -V -D"java.util.logging.config.file"="logging.properties" -D"http.keepAlive"="false" -D"maven.wagon.http.pool"="false" -D"maven.wagon.httpconnectionManager.ttlSeconds"="120"
+
+  coverage-report:
+    needs: test
+    runs-on: ubuntu-18.04
+
+
+
