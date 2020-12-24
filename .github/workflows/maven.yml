@@ -33,7 +33,7 @@ jobs:
     steps:
       - uses: coverallsapp/github-action@master
         with:
-          - repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Report code coverage
         run: mvn jacoco:report coveralls:report -Droot.logging.level=INFO
 
