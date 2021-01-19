@@ -46,6 +46,8 @@ import quickfix.fix44.ListStatusRequest;
 import quickfix.fix44.TestRequest;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
@@ -126,6 +128,19 @@ public class TimerTestClient extends MessageCracker implements Application {
             if (failed) {
                 String message = "TimerTestClient had to send a test request, indicating that the test server was not reliably sending heartbeats.";
                 log.error(message);
+
+                Map<Thread, StackTraceElement[]> allStackTraces = Thread.getAllStackTraces();
+                Set<Map.Entry<Thread, StackTraceElement[]>> entries = allStackTraces.entrySet();
+
+                for (Map.Entry<Thread, StackTraceElement[]> entry : entries) {
+                    log.info("ml_test, thread - {}", entry.getKey());
+                    StackTraceElement[] value = entry.getValue();
+
+                    for (int i = 0; i < value.length; i++) {
+                        log.info("ml_test, trace {}", value[i]);
+                    }
+                }
+
                 throw new RuntimeError(message);
             }
         } finally {
