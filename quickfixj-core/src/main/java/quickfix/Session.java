@@ -1955,7 +1955,10 @@ public class Session implements Closeable {
             disconnect("Timed out waiting for logout response", true);
         }
 
-        if (state.isTimedOut()) {
+        boolean timedOut = state.isTimedOut();
+        LOG.info("isTimedOut [timedOut={},sessionID={}]", timedOut, sessionID);
+
+        if (timedOut) {
             if (!disableHeartBeatCheck) {
                 disconnect("Timed out waiting for heartbeat", true);
                 stateListener.onHeartBeatTimeout();
@@ -1967,8 +1970,12 @@ public class Session implements Closeable {
                 generateTestRequest("TEST");
                 getLog().onEvent("Sent test request TEST");
                 stateListener.onMissedHeartBeat();
-            } else if (state.isHeartBeatNeeded()) {
-                generateHeartbeat();
+            } else {
+                boolean heartBeatNeeded = state.isHeartBeatNeeded();
+                LOG.info("heartBeatNeeded={},sessionID={}", heartBeatNeeded, sessionID);
+                if (heartBeatNeeded) {
+                    generateHeartbeat();
+                }
             }
         }
     }

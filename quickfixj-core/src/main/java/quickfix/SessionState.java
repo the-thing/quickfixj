@@ -19,6 +19,9 @@
 
 package quickfix;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
@@ -34,6 +37,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * the session's intrinsic lock. The log and message store implementation must be thread safe.
  */
 public final class SessionState {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionState.class);
+
     private final Object lock;
     private final Log log;
 
@@ -107,9 +113,14 @@ public final class SessionState {
     }
 
     public boolean isHeartBeatNeeded() {
-        long millisSinceLastSentTime = SystemTime.currentTimeMillis() - getLastSentTime();
+        long currentTime = System.currentTimeMillis();
+        long lastSentTime = getLastSentTime();
+        long millisSinceLastSentTime = currentTime - lastSentTime;
+        long heartBeatMillis = getHeartBeatMillis();
+        int testRequestCounter = getTestRequestCounter();
+        LOGGER.info("isHeartBeatNeeded [currentTime={},lastSentTime={},millisSinceLastSentTime={},heartBeatMillis={},testRequestCounter={}]", currentTime, lastSentTime, millisSinceLastSentTime, heartBeatMillis, testRequestCounter);
         // QFJ-448: allow 10 ms leeway since exact comparison causes skipped heartbeats occasionally
-        return millisSinceLastSentTime + 10 > getHeartBeatMillis() && getTestRequestCounter() == 0;
+        return millisSinceLastSentTime + 10 > heartBeatMillis && testRequestCounter == 0;
     }
 
     public boolean isInitiator() {
@@ -288,6 +299,9 @@ public final class SessionState {
 
     public boolean isTimedOut() {
         long millisSinceLastReceivedTime = timeSinceLastReceivedMessage();
+        long heartBeatMillis = getHeartBeatMillis();
+        LOGGER.info("isTimedOut [sessionID={}, millisSinceLastReceivedTime={},heartBeatMillis={},heartBeatTimeoutMultiplier={}]",
+                    millisSinceLastReceivedTime, heartBeatMillis, heartBeatTimeoutMultiplier);
         return millisSinceLastReceivedTime >= (1 + heartBeatTimeoutMultiplier) * getHeartBeatMillis();
     }
 
