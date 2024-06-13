@@ -217,6 +217,21 @@
 					</instructions>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<configuration>
+					<includes>
+						<include>quickfix/**</include>
+						<include>org/**</include>
+						<include>quickfix/field/converter/*</include>
+					</includes>
+					<excludes>
+						<exclude>quickfix/field/*</exclude>
+						<exclude>quickfix/fix*/**</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -302,6 +317,7 @@
 						<artifactId>maven-surefire-plugin</artifactId>
 						<configuration>
 							<argLine>
+								@{argLine}
 								-Xmx2g -Djava.net.preferIPv4Stack=true
 								--add-opens java.base/java.lang=ALL-UNNAMED
 							</argLine>
