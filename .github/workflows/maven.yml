@@ -58,7 +58,7 @@ jobs:
       - name: Test with Maven on Windows
         run: ./mvnw.cmd install -B -V -D"maven.javadoc.skip"="true" -P"skipBundlePlugin,minimal-fix-latest" -D"java.util.logging.config.file"="./quickfixj-core/src/test/resources/logging.properties"  -D"http.keepAlive"="false" -D"maven.wagon.http.pool"="false" -D"maven.wagon.httpconnectionManager.ttlSeconds"="120"
       - name: Debug one
-        run: echo ${{ github.workspace }}
+        run: echo ${{ github.workspace }}/quickfixj-core/target/site/jacoco/jacoco.exec
       - name: Debug two
         run: echo $GITHUB_WORKSPACE
       - name: Upload coverage to Codecov
@@ -66,4 +66,4 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_ORG_TOKEN }}
-          file: ./quickfixj-core/target/site/jacoco/jacoco.exec
+          file: ${{ github.workspace }}/quickfixj-core/target/site/jacoco/jacoco.exec
