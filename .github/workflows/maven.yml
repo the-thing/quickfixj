@@ -35,6 +35,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest]
+#        java: [8, 11, 17]
         java: [8]
       fail-fast: false
       max-parallel: 3
@@ -59,5 +60,6 @@ jobs:
       - name: Upload coverage to Codecov
         if: success() && matrix.java == '8'
         uses: codecov/codecov-action@v4
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_ORG_TOKEN }}
+        with:
+          token: ${{ secrets.CODECOV_ORG_TOKEN }}
+          directory: ./quickfixj-core/target/
