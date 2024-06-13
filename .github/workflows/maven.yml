@@ -64,4 +64,4 @@ jobs:
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_ORG_TOKEN }}
-          directory: ./quickfixj-core/target/site/jacoco
+          file: ./quickfixj-core/target/site/jacoco/jacoco.exec
