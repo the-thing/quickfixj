@@ -8,7 +8,7 @@ on:
   schedule:
     - cron:  '30 5 * * *'
 
-  jobs:
+jobs:
 #  test:
 #    runs-on: ${{ matrix.os }}
 #    strategy:
