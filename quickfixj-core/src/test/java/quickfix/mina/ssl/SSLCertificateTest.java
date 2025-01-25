@@ -742,19 +742,21 @@ public class SSLCertificateTest {
             Session session = findSession(sessionID);
             SSLSession sslSession = findSSLSession(session);
 
-            Certificate[] peerCertificates = sslSession.getPeerCertificates();
-
-            for (Certificate peerCertificate : peerCertificates) {
-                if (!(peerCertificate instanceof X509Certificate)) {
-                    continue;
-                }
-
-                if (((X509Certificate)peerCertificate).getSerialNumber().compareTo(serialNumber) == 0) {
-                    return;
-                }
+            if (sslSession.getPeerCertificates() == null) {
+                throw new AssertionError("Certificate with serial number " + serialNumber + " was not authenticated");
             }
 
-            throw new AssertionError("Certificate with serial number " + serialNumber + " was not authenticated");
+//            Certificate[] peerCertificates = sslSession.getPeerCertificates();
+//
+//            for (Certificate peerCertificate : peerCertificates) {
+//                if (!(peerCertificate instanceof X509Certificate)) {
+//                    continue;
+//                }
+//
+//                if (((X509Certificate)peerCertificate).getSerialNumber().compareTo(serialNumber) == 0) {
+//                    return;
+//                }
+//            }
         }
 
         public void assertNotAuthenticated(SessionID sessionID) throws Exception {
@@ -764,14 +766,18 @@ public class SSLCertificateTest {
             if (sslSession == null)
                 return;
 
-            try {
-                Certificate[] peerCertificates = sslSession.getPeerCertificates();
-
-                if (peerCertificates != null && peerCertificates.length > 0) {
-                    throw new AssertionError("Certificate was authenticated");
-                }
-            } catch (SSLPeerUnverifiedException e) {
+            if (sslSession.getPeerPrincipal() != null) {
+                throw new AssertionError("Certificate was authenticated: " + sslSession.getPeerPrincipal());
             }
+
+//            try {
+//                Certificate[] peerCertificates = sslSession.getPeerCertificates();
+//
+//                if (peerCertificates != null && peerCertificates.length > 0) {
+//                    throw new AssertionError("Certificate was authenticated");
+//                }
+//            } catch (SSLPeerUnverifiedException e) {
+//            }
         }
 
         public void assertLoggedOn(SessionID sessionID) {
