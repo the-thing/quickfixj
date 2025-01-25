@@ -6,6 +6,7 @@ import static org.junit.Assert.assertSame;
 
 import javax.net.ssl.SSLContext;
 
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -14,6 +15,13 @@ import org.junit.Test;
  * @author toli
  */
 public class SSLContextFactoryTest {
+
+    private SSLContextFactory underTest;
+
+    @Before
+    public void setUp() {
+        underTest = new SSLContextFactory();
+    }
 
     @Test
     public void testGetInstance() throws Exception {
@@ -26,7 +34,7 @@ public class SSLContextFactoryTest {
         sslConfig.setTrustStoreType("JKS");
         sslConfig.setTrustManagerFactoryAlgorithm("PKIX");
 
-        SSLContext context = SSLContextFactory.getInstance(sslConfig);
+        SSLContext context = underTest.getInstance(sslConfig);
         assertNotNull(context);
         assertNotNull(context.getProvider());
     }
@@ -39,7 +47,7 @@ public class SSLContextFactoryTest {
         sslConfig.setKeyStoreType("JKS");
         sslConfig.setKeyManagerFactoryAlgorithm("SunX509");
 
-        SSLContextFactory.getInstance(sslConfig);
+        underTest.getInstance(sslConfig);
     }
 
     @Test
@@ -50,7 +58,7 @@ public class SSLContextFactoryTest {
         sslConfig1.setKeyStoreType("JKS");
         sslConfig1.setKeyManagerFactoryAlgorithm("SunX509");
 
-        SSLContext sslContext1 = SSLContextFactory.getInstance(sslConfig1);
+        SSLContext sslContext1 = underTest.getInstance(sslConfig1);
 
         SSLConfig sslConfig2 = new SSLConfig();
         sslConfig2.setKeyStoreName("keystore");
@@ -58,7 +66,7 @@ public class SSLContextFactoryTest {
         sslConfig2.setKeyStoreType("JKS");
         sslConfig2.setKeyManagerFactoryAlgorithm("SunX509");
 
-        SSLContext sslContext2 = SSLContextFactory.getInstance(sslConfig2);
+        SSLContext sslContext2 = underTest.getInstance(sslConfig2);
 
         assertSame(sslContext1, sslContext2);
     }
@@ -71,7 +79,7 @@ public class SSLContextFactoryTest {
         sslConfig1.setKeyStoreType("JKS");
         sslConfig1.setKeyManagerFactoryAlgorithm("SunX509");
 
-        SSLContext sslContext1 = SSLContextFactory.getInstance(sslConfig1);
+        SSLContext sslContext1 = underTest.getInstance(sslConfig1);
 
         SSLConfig sslConfig2 = new SSLConfig();
         sslConfig2.setKeyStoreName("keystore2");
@@ -79,7 +87,7 @@ public class SSLContextFactoryTest {
         sslConfig2.setKeyStoreType("JKS");
         sslConfig2.setKeyManagerFactoryAlgorithm("SunX509");
 
-        SSLContext sslContext2 = SSLContextFactory.getInstance(sslConfig2);
+        SSLContext sslContext2 = underTest.getInstance(sslConfig2);
 
         assertNotSame(sslContext1, sslContext2);
     }

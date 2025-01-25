@@ -103,6 +103,7 @@ public class IoSessionInitiator {
         private final NetworkingOptions networkingOptions;
         private final EventHandlingStrategy eventHandlingStrategy;
         private final SSLConfig sslConfig;
+        private final SSLContextFactory sslContextFactory;
         private final Logger log;
 
         private IoSession ioSession;
@@ -139,6 +140,7 @@ public class IoSessionInitiator {
             this.networkingOptions = networkingOptions;
             this.eventHandlingStrategy = eventHandlingStrategy;
             this.sslConfig = sslConfig;
+            this.sslContextFactory = new SSLContextFactory();
             this.log = log;
 
             this.proxyType = proxyType;
@@ -192,7 +194,7 @@ public class IoSessionInitiator {
 
         private void installSslFilter(CompositeIoFilterChainBuilder ioFilterChainBuilder)
                 throws GeneralSecurityException {
-            final SSLContext sslContext = SSLContextFactory.getInstance(sslConfig);
+            final SSLContext sslContext = sslContextFactory.getInstance(sslConfig);
             final SslFilter sslFilter = new SslFilter(sslContext, false);
             sslFilter.setEnabledCipherSuites(sslConfig.getEnabledCipherSuites() != null ? sslConfig.getEnabledCipherSuites()
                     : SSLSupport.getDefaultCipherSuites(sslContext));

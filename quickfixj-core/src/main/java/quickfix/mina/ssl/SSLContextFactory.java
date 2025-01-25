@@ -36,8 +36,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * SSL context factory that deals with various SSL configuration.
@@ -46,13 +46,32 @@ public class SSLContextFactory {
     private static final Logger log = LoggerFactory.getLogger(SSLContextFactory.class);
     private static final String PROTOCOL = "TLS";
 
+    private final ConcurrentMap<SSLConfig, SSLContext> contextByConfig;
+
+    public SSLContextFactory() {
+        this.contextByConfig = new ConcurrentHashMap<>();
+    }
+
     /**
      * Creates an {@link SSLContext} with a specified {@link SSLConfig}
      */
-    public static SSLContext getInstance(SSLConfig sslConfig)
+    public SSLContext getInstance(SSLConfig sslConfig)
             throws GeneralSecurityException {
+        SSLContext context = contextByConfig.get(sslConfig);
+
+        if (context != null) {
+            return context;
+        }
+
         try {
-            return createSSLContext(sslConfig);
+            SSLContext newContext = createSSLContext(sslConfig);
+            context = contextByConfig.putIfAbsent(sslConfig, newContext);
+
+            if (context != null) {
+                return context;
+            } else {
+                return newContext;
+            }
         } catch (Exception ioe) {
             throw new GeneralSecurityException("Can't create SSLContext", ioe);
         }

@@ -69,6 +69,7 @@ public abstract class AbstractSocketAcceptor extends SessionConnector implements
     private final SessionFactory sessionFactory;
     private final Map<SocketAddress, AcceptorSocketDescriptor> socketDescriptorForAddress = new HashMap<>();
     private final ConcurrentMap<AcceptorSocketDescriptor, IoAcceptor> ioAcceptors = new ConcurrentHashMap<>();
+    private final SSLContextFactory sslContextFactory = new SSLContextFactory();
 
     protected AbstractSocketAcceptor(SessionSettings settings, SessionFactory sessionFactory)
             throws ConfigError {
@@ -133,7 +134,7 @@ public abstract class AbstractSocketAcceptor extends SessionConnector implements
             CompositeIoFilterChainBuilder ioFilterChainBuilder) throws GeneralSecurityException {
         log.info("Installing SSL filter for {}", descriptor.getAddress());
         SSLConfig sslConfig = descriptor.getSslConfig();
-        SSLContext sslContext = SSLContextFactory.getInstance(sslConfig);
+        SSLContext sslContext = sslContextFactory.getInstance(sslConfig);
         SslFilter sslFilter = new SslFilter(sslContext);
         sslFilter.setNeedClientAuth(sslConfig.isNeedClientAuth());
         sslFilter.setEnabledCipherSuites(sslConfig.getEnabledCipherSuites() != null ? sslConfig.getEnabledCipherSuites()
