@@ -54,14 +54,19 @@ public class SSLContextFactory {
     public static SSLContext getInstance(SSLConfig sslConfig)
             throws GeneralSecurityException {
         synchronized (contextCache) {
+            log.info("ssl_debug, contextCache = {}", contextCache);
+
             SSLContext context = contextCache.get(sslConfig);
             if (context == null) {
                 try {
                     context = createSSLContext(sslConfig);
+                    log.info("ssl_debug, created context = {} for ssl config = {}", context, sslConfig);
                     contextCache.put(sslConfig, context);
                 } catch (Exception ioe) {
                     throw new GeneralSecurityException("Can't create SSLContext", ioe);
                 }
+            } else {
+                log.info("ssl_debug, context exists for ssl config = {}", sslConfig);
             }
             return context;
         }
