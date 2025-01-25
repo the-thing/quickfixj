@@ -96,7 +96,7 @@ public class SSLContextFactory {
             trustManagers = X509TrustManagerWrapper.wrap(trustManagers);
         }
 
-        SSLContext sslContext = SSLContext.getInstance(PROTOCOL);
+        SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
         sslContext.init(kmf.getKeyManagers(), trustManagers, null);
 
         return sslContext;
