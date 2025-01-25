@@ -41,34 +41,20 @@ import java.util.Map;
 
 /**
  * SSL context factory that deals with various SSL configuration.
- * Caches the created SSL contexts for future reuse.
  */
 public class SSLContextFactory {
     private static final Logger log = LoggerFactory.getLogger(SSLContextFactory.class);
     private static final String PROTOCOL = "TLS";
-    private static final Map<SSLConfig, SSLContext> contextCache = new HashMap<>();
 
     /**
      * Creates an {@link SSLContext} with a specified {@link SSLConfig}
      */
     public static SSLContext getInstance(SSLConfig sslConfig)
             throws GeneralSecurityException {
-        synchronized (contextCache) {
-            log.info("ssl_debug, contextCache = {}", contextCache);
-
-            SSLContext context = contextCache.get(sslConfig);
-            if (context == null) {
-                try {
-                    context = createSSLContext(sslConfig);
-                    log.info("ssl_debug, created context = {} for ssl config = {}", context, sslConfig);
-                    contextCache.put(sslConfig, context);
-                } catch (Exception ioe) {
-                    throw new GeneralSecurityException("Can't create SSLContext", ioe);
-                }
-            } else {
-                log.info("ssl_debug, context exists for ssl config = {}", sslConfig);
-            }
-            return context;
+        try {
+            return createSSLContext(sslConfig);
+        } catch (Exception ioe) {
+            throw new GeneralSecurityException("Can't create SSLContext", ioe);
         }
     }
 
