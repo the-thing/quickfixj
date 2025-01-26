@@ -61,6 +61,7 @@ import java.security.Principal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -769,16 +770,20 @@ public class SSLCertificateTest {
         }
 
         public void assertNotAuthenticated(SessionID sessionID) throws Exception {
+            LOGGER.info("ssl_debug, assertNotAuthenticated sessions [sessionIds={},managedSessions={},allSessions={}]", connector.getSessions(), connector.getManagedSessions(), connector.getAllSessions());
+
             Session session = findSession(sessionID);
             SSLSession sslSession = findSSLSession(session);
 
             if (sslSession == null)
                 return;
 
+
             Principal peerPrincipal = getPeerPrincipal(sslSession);
+            LOGGER.info("ssl_debug, assertNotAuthenticated [sessionID={},session={},peerPrincipal={}]", sessionID, session, peerPrincipal);
 
             if (peerPrincipal != null) {
-                LOGGER.info("Peer principal found [sessionID={},session={},peerPrincipal={}]", sessionID, session, peerPrincipal);
+
                 throw new AssertionError("Certificate was authenticated: " + peerPrincipal);
             }
 
@@ -889,7 +894,11 @@ public class SSLCertificateTest {
 
         private void logSSLInfo() throws Exception {
             List<SessionID> sessionsIDs = connector.getSessions();
-            LOGGER.info("ssl_debug, All session IDs: {}", sessionsIDs);
+            List<Session> managedSessions = connector.getManagedSessions();
+            Map<SessionID, Session> allSessions = connector.getAllSessions();
+
+            LOGGER.info("ssl_debug, sessions [name={},sessionIds={},managedSessions={},allSessions={}]",
+                testName, sessionsIDs, managedSessions, allSessions);
 
             for (SessionID sessionID : sessionsIDs) {
                 Session session = findSession(sessionID);

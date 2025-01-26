@@ -38,6 +38,7 @@ import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -140,6 +141,10 @@ public abstract class SessionConnector implements Connector {
      */
     public List<Session> getManagedSessions() {
         return new ArrayList<>(sessions.values());
+    }
+
+    public Map<SessionID, Session> getAllSessions() {
+        return new HashMap<>(sessions);
     }
 
     /**
