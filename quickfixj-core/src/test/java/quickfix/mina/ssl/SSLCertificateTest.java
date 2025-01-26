@@ -73,6 +73,7 @@ public class SSLCertificateTest {
 
     // Note: To diagnose cipher suite errors, run with -Djavax.net.debug=ssl:handshake
     private static final String CIPHER_SUITES_TLS = "TLS_AES_256_GCM_SHA384";
+    private static final Logger LOGGER = LoggerFactory.getLogger(SSLCertificateTest.class);
 
     @Rule
     public TestNameRule testNameRule = new TestNameRule();
@@ -441,6 +442,15 @@ public class SSLCertificateTest {
                 initiator2.start();
                 initiator3.start();
 
+                Thread.sleep(4_000);
+
+                LOGGER.info("SSL INFO BEFORE [testName={}]", testNameRule.getTestName());
+                initiator1.logSSLInfo();
+                initiator2.logSSLInfo();
+                initiator3.logSSLInfo();
+                acceptor.logSSLInfo();
+                LOGGER.info("SSL INFO AFTER [testName={}]", testNameRule.getTestName());
+
                 initiator1.assertSslExceptionThrown();
                 initiator1.assertNotLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU0", "ALFA0"));
                 initiator1.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU0", "ALFA0"));
@@ -671,8 +681,8 @@ public class SSLCertificateTest {
         }
     }
 
-    static abstract class TestConnector {
-        private static final Logger LOGGER = LoggerFactory.getLogger(TestConnector.class);
+    abstract class TestConnector {
+        private final Logger LOGGER = LoggerFactory.getLogger(TestConnector.class);
         private static final int TIMEOUT_SECONDS = 5;
 
         private final SessionConnector connector;
@@ -761,8 +771,14 @@ public class SSLCertificateTest {
             Session session = findSession(sessionID);
             SSLSession sslSession = findSSLSession(session);
 
+            LOGGER.info("assertNotAuthenticated [testName={},sessionId={}]",
+                SSLCertificateTest.this.testNameRule.getTestName(), sessionID);
+
             if (sslSession == null)
                 return;
+
+            LOGGER.info("assertNotAuthenticated [testName={},sessionId={},session={},sslSession={},peerCertificates={},peerPrincipal={}]",
+                SSLCertificateTest.this.testNameRule.getTestName(), sessionID, session, sslSession, sslSession.getPeerCertificates(), sslSession.getPeerPrincipal(), sslSession.getPeerPrincipal());
 
             try {
                 Certificate[] peerCertificates = sslSession.getPeerCertificates();
@@ -834,22 +850,22 @@ public class SSLCertificateTest {
             connector.stop();
         }
 
-        private void logSSLInfo() throws Exception {
+        public void logSSLInfo() throws Exception {
             List<SessionID> sessionsIDs = connector.getSessions();
-            LOGGER.info("All session IDs: {}", sessionsIDs);
+            LOGGER.info("All SSL sessions [testName={},sessionIDs={}]", testNameRule.getTestName(), sessionsIDs);
 
             for (SessionID sessionID : sessionsIDs) {
                 Session session = findSession(sessionID);
 
                 if (session == null) {
-                    LOGGER.info("No session found for ID: {}", sessionID);
+                    LOGGER.info("No session found [testName={},sessionID={}]", testNameRule.getTestName(), sessionID);
                     continue;
                 }
 
                 SSLSession sslSession = findSSLSession(session);
 
                 if (sslSession == null) {
-                    LOGGER.info("No SSL session found for session: {}", session);
+                    LOGGER.info("No SSL session found [testName={},session={}]", testNameRule.getTestName(), session);
                     continue;
                 }
 
@@ -857,14 +873,14 @@ public class SSLCertificateTest {
                 String exceptionMessage = exception != null ? exception.getMessage() : null;
                 Class<?> exceptionType = exception != null ? exception.getClass() : null;
 
-                LOGGER.info("SSL session info [sessionID={},isLoggedOn={},sslSession={},peerCertificates={},localCertificates={},peerPrincipal={},exceptionMessage={},exceptionType={}]",
-                    sessionID, session.isLoggedOn(), sslSession, sslSession.getPeerCertificates(), sslSession.getLocalCertificates(), sslSession.getPeerPrincipal(), exceptionMessage, exceptionType);
+                LOGGER.info("SSL session info [testName={},sessionID={},isLoggedOn={},sslSession={},peerCertificates={},localCertificates={},peerPrincipal={},exceptionMessage={},exceptionType={}]",
+                    testNameRule.getTestName(), sessionID, session.isLoggedOn(), sslSession, sslSession.getPeerCertificates(), sslSession.getLocalCertificates(), sslSession.getPeerPrincipal(), exceptionMessage, exceptionType);
             }
         }
     }
 
-    static class TestAcceptor extends TestConnector {
-        private static final Logger LOGGER = LoggerFactory.getLogger(TestAcceptor.class);
+    class TestAcceptor extends TestConnector {
+        private final Logger LOGGER = LoggerFactory.getLogger(TestAcceptor.class);
 
         public TestAcceptor(SessionSettings sessionSettings) throws ConfigError {
             super(sessionSettings);
@@ -882,8 +898,8 @@ public class SSLCertificateTest {
         }
     }
 
-    static class TestInitiator extends TestConnector {
-        private static final Logger LOGGER = LoggerFactory.getLogger(TestInitiator.class);
+    class TestInitiator extends TestConnector {
+        private final Logger LOGGER = LoggerFactory.getLogger(TestInitiator.class);
 
         public TestInitiator(SessionSettings sessionSettings) throws ConfigError {
             super(sessionSettings);
