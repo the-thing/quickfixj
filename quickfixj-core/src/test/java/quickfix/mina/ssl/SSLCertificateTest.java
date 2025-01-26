@@ -778,6 +778,7 @@ public class SSLCertificateTest {
             Principal peerPrincipal = getPeerPrincipal(sslSession);
 
             if (peerPrincipal != null) {
+                LOGGER.info("Peer principal found [sessionID={},session={},peerPrincipal={}]", sessionID, session, peerPrincipal);
                 throw new AssertionError("Certificate was authenticated: " + peerPrincipal);
             }
 
