@@ -14,9 +14,12 @@ public final class LogTestName implements TestRule {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LogTestName.class);
 
+    private String testName;
+
     @Override
     public Statement apply(Statement base, Description description) {
-        LOGGER.info("{} [{}] Running test '{}#{}'", System.currentTimeMillis(), Thread.currentThread(), description.getClassName(), description.getMethodName());
+        testName = description.getClassName() + "#" + description.getMethodName();
+        LOGGER.info("{} [{}] Running test '{}'", System.currentTimeMillis(), Thread.currentThread(), testName);
 
         try {
             SSLServerSocketFactory sslServerSocketFactory = SSLContext.getDefault().getServerSocketFactory();
@@ -29,5 +32,9 @@ public final class LogTestName implements TestRule {
         }
 
         return base;
+    }
+
+    public String getTestName() {
+        return testName;
     }
 }

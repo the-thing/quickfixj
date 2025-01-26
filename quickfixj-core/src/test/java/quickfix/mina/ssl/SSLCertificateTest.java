@@ -21,8 +21,10 @@ package quickfix.mina.ssl;
 
 import org.apache.mina.core.filterchain.IoFilterAdapter;
 import org.apache.mina.core.filterchain.IoFilterChain;
+import org.apache.mina.core.session.AttributeKey;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.ssl.SslFilter;
+import org.apache.mina.filter.ssl.SslHandler;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -48,12 +50,15 @@ import quickfix.mina.IoSessionResponder;
 import quickfix.mina.ProtocolFactory;
 import quickfix.mina.SessionConnector;
 
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -725,7 +730,7 @@ public class SSLCertificateTest {
             return null;
         }
 
-        private IoSession findIoSession(Session session) throws Exception {
+        private static IoSession findIoSession(Session session) throws Exception {
             IoSessionResponder ioSessionResponder = (IoSessionResponder) session.getResponder();
 
             if (ioSessionResponder == null)
@@ -783,12 +788,39 @@ public class SSLCertificateTest {
 //            }
         }
 
-        private Principal getPeerPrincipal(SSLSession session) {
+        private static Principal getPeerPrincipal(SSLSession session) {
             try {
                 return session.getPeerPrincipal();
             } catch (SSLPeerUnverifiedException e) {
                 return null;
             }
+        }
+
+        private static SSLEngine getSSLEngine(Session session) throws Exception {
+            IoSession ioSession = findIoSession(session);
+
+            if (ioSession == null) {
+                return null;
+            }
+
+            IoFilterChain filterChain = ioSession.getFilterChain();
+            SslFilter sslFilter = (SslFilter) filterChain.get(SSLSupport.FILTER_NAME);
+
+            if (sslFilter == null) {
+                return null;
+            }
+
+            AttributeKey sslHandlerKey = new AttributeKey(SslHandler.class, "handler");
+            SslHandler sslHandler = (SslHandler) ioSession.getAttribute(sslHandlerKey);
+
+            if (sslHandler == null) {
+                return null;
+            }
+
+            Field engineField = sslHandler.getClass().getSuperclass().getDeclaredField("mEngine");
+            engineField.setAccessible(true);
+
+            return (SSLEngine) engineField.get(sslHandler);
         }
 
         public void assertLoggedOn(SessionID sessionID) {
@@ -873,9 +905,15 @@ public class SSLCertificateTest {
                 Throwable exception = this.exception.get();
                 String exceptionMessage = exception != null ? exception.getMessage() : null;
                 Class<?> exceptionType = exception != null ? exception.getClass() : null;
+                SSLEngine sslEngine = getSSLEngine(session);
+                SSLEngineResult.HandshakeStatus handshakeStatus = sslEngine != null ? sslEngine.getHandshakeStatus() : null;
+                boolean inboundDone = sslEngine.isInboundDone();
+                boolean outboundDone = sslEngine.isOutboundDone();
 
-                LOGGER.info("SSL session info [sessionID={},isLoggedOn={},sslSession={},peerCertificates={},localCertificates={},peerPrincipal={},exceptionMessage={},exceptionType={}]",
-                    sessionID, session.isLoggedOn(), sslSession, sslSession.getPeerCertificates(), sslSession.getLocalCertificates(), sslSession.getPeerPrincipal(), exceptionMessage, exceptionType);
+                LOGGER.info("SSL session info [testName={},sessionID={},isLoggedOn={},sslSession={},valid={},peerCertificates={},localCertificates={},peerPrincipal={}," +
+                        "exceptionMessage={},exceptionType={},handshakeStatus={},inboundDone={},outboundDone={}]",
+                    sessionID, session.isLoggedOn(), sslSession, sslSession.isValid(), sslSession.getPeerCertificates(), sslSession.getLocalCertificates(), sslSession.getPeerPrincipal(),
+                    exceptionMessage, exceptionType, handshakeStatus, inboundDone, outboundDone);
             }
         }
     }
