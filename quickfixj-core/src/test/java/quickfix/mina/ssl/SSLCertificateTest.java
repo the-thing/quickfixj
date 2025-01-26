@@ -23,6 +23,7 @@ import org.apache.mina.core.filterchain.IoFilterAdapter;
 import org.apache.mina.core.filterchain.IoFilterChain;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.ssl.SslFilter;
+import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +64,7 @@ import java.util.logging.Level;
 import org.apache.mina.util.AvailablePortFinder;
 import org.junit.After;
 import quickfix.mina.SocksProxyServer;
+import quickfix.test.util.TestNameRule;
 
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -71,6 +73,9 @@ public class SSLCertificateTest {
 
     // Note: To diagnose cipher suite errors, run with -Djavax.net.debug=ssl:handshake
     private static final String CIPHER_SUITES_TLS = "TLS_AES_256_GCM_SHA384";
+
+    @Rule
+    public TestNameRule testNameRule = new TestNameRule();
 
     @After
     public void cleanup() {
