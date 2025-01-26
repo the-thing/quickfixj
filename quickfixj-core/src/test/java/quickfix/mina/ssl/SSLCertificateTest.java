@@ -52,6 +52,7 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 import java.lang.reflect.Field;
 import java.math.BigInteger;
+import java.security.Principal;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
@@ -682,7 +683,7 @@ public class SSLCertificateTest {
     }
 
     abstract class TestConnector {
-        private final Logger LOGGER = LoggerFactory.getLogger(TestConnector.class);
+
         private static final int TIMEOUT_SECONDS = 5;
 
         private final SessionConnector connector;
@@ -752,7 +753,7 @@ public class SSLCertificateTest {
             Session session = findSession(sessionID);
             SSLSession sslSession = findSSLSession(session);
 
-            Certificate[] peerCertificates = sslSession.getPeerCertificates();
+            Certificate[] peerCertificates = getPeerCertificates(sslSession);
 
             for (Certificate peerCertificate : peerCertificates) {
                 if (!(peerCertificate instanceof X509Certificate)) {
@@ -777,16 +778,13 @@ public class SSLCertificateTest {
             if (sslSession == null)
                 return;
 
+            Certificate[] peerCertificates = getPeerCertificates(sslSession);
+
             LOGGER.info("assertNotAuthenticated [testName={},sessionId={},session={},sslSession={},peerCertificates={},peerPrincipal={}]",
-                SSLCertificateTest.this.testNameRule.getTestName(), sessionID, session, sslSession, sslSession.getPeerCertificates(), sslSession.getPeerPrincipal(), sslSession.getPeerPrincipal());
+                SSLCertificateTest.this.testNameRule.getTestName(), sessionID, session, sslSession, peerCertificates, getPeerPrincipal(sslSession));
 
-            try {
-                Certificate[] peerCertificates = sslSession.getPeerCertificates();
-
-                if (peerCertificates != null && peerCertificates.length > 0) {
-                    throw new AssertionError("Certificate was authenticated");
-                }
-            } catch (SSLPeerUnverifiedException e) {
+            if (peerCertificates != null && peerCertificates.length > 0) {
+                throw new AssertionError("Certificate was authenticated");
             }
         }
 
@@ -874,13 +872,12 @@ public class SSLCertificateTest {
                 Class<?> exceptionType = exception != null ? exception.getClass() : null;
 
                 LOGGER.info("SSL session info [testName={},sessionID={},isLoggedOn={},sslSession={},peerCertificates={},localCertificates={},peerPrincipal={},exceptionMessage={},exceptionType={}]",
-                    testNameRule.getTestName(), sessionID, session.isLoggedOn(), sslSession, sslSession.getPeerCertificates(), sslSession.getLocalCertificates(), sslSession.getPeerPrincipal(), exceptionMessage, exceptionType);
+                    testNameRule.getTestName(), sessionID, session.isLoggedOn(), sslSession, sslSession.getPeerCertificates(), sslSession.getLocalCertificates(), getPeerPrincipal(sslSession), exceptionMessage, exceptionType);
             }
         }
     }
 
     class TestAcceptor extends TestConnector {
-        private final Logger LOGGER = LoggerFactory.getLogger(TestAcceptor.class);
 
         public TestAcceptor(SessionSettings sessionSettings) throws ConfigError {
             super(sessionSettings);
@@ -899,7 +896,6 @@ public class SSLCertificateTest {
     }
 
     class TestInitiator extends TestConnector {
-        private final Logger LOGGER = LoggerFactory.getLogger(TestInitiator.class);
 
         public TestInitiator(SessionSettings sessionSettings) throws ConfigError {
             super(sessionSettings);
@@ -1116,5 +1112,21 @@ public class SSLCertificateTest {
         sessionSettings.setString(sessionID, "TargetCompID", targetId);
 
         return sessionSettings;
+    }
+
+    public static Certificate[] getPeerCertificates(SSLSession session) {
+        try {
+            return session.getPeerCertificates();
+        } catch (SSLPeerUnverifiedException e) {
+            return null;
+        }
+    }
+
+    public static Principal getPeerPrincipal(SSLSession session) {
+        try {
+            return session.getPeerPrincipal();
+        } catch (SSLPeerUnverifiedException e) {
+            return null;
+        }
     }
 }
