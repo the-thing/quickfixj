@@ -53,8 +53,7 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 import java.lang.reflect.Field;
 import java.math.BigInteger;
-import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -742,7 +741,9 @@ public class SSLCertificateTest {
             Session session = findSession(sessionID);
             SSLSession sslSession = findSSLSession(session);
 
-            if (sslSession.getPeerCertificates() == null) {
+            Principal peerPrincipal = getPeerPrincipal(sslSession);
+
+            if (peerPrincipal == null) {
                 throw new AssertionError("Certificate with serial number " + serialNumber + " was not authenticated");
             }
 
@@ -766,8 +767,10 @@ public class SSLCertificateTest {
             if (sslSession == null)
                 return;
 
-            if (sslSession.getPeerPrincipal() != null) {
-                throw new AssertionError("Certificate was authenticated: " + sslSession.getPeerPrincipal());
+            Principal peerPrincipal = getPeerPrincipal(sslSession);
+
+            if (peerPrincipal != null) {
+                throw new AssertionError("Certificate was authenticated: " + peerPrincipal);
             }
 
 //            try {
@@ -778,6 +781,14 @@ public class SSLCertificateTest {
 //                }
 //            } catch (SSLPeerUnverifiedException e) {
 //            }
+        }
+
+        private Principal getPeerPrincipal(SSLSession session) {
+            try {
+                return session.getPeerPrincipal();
+            } catch (SSLPeerUnverifiedException e) {
+                return null;
+            }
         }
 
         public void assertLoggedOn(SessionID sessionID) {
