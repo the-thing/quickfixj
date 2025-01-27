@@ -808,11 +808,13 @@ public class SSLCertificateTest {
 
             Certificate[] peerCertificates = getPeerCertificates(sslSession);
             SSLEngine sslEngine = getSSLEngine(session);
-
+            SslHandler sslHandler = getSSLHandler(session);
             SSLEngineResult.HandshakeStatus handshakeStatus = sslEngine != null ? sslEngine.getHandshakeStatus() : null;
+            Boolean handlerOpen = sslHandler != null ? sslHandler.isOpen() : null;
+            Boolean handlerConnected = sslHandler != null ? sslHandler.isConnected() : null;
 
-            LOGGER.info("assertNotAuthenticated [testName={},sessionId={},session={},sslSession={},peerCertificates={},peerPrincipal={},handshakeStatus={}]",
-                SSLCertificateTest.this.testNameRule.getTestName(), sessionID, session, sslSession, peerCertificates, getPeerPrincipal(sslSession), handshakeStatus);
+            LOGGER.info("assertNotAuthenticated [testName={},sessionId={},session={},sslSession={},peerCertificates={},peerPrincipal={},handshakeStatus={},handlerConnected={},handlerOpen={}]",
+                SSLCertificateTest.this.testNameRule.getTestName(), sessionID, session, sslSession, peerCertificates, getPeerPrincipal(sslSession), handshakeStatus, handlerConnected, handlerOpen);
 
             if (peerCertificates != null && peerCertificates.length > 0) {
                 throw new AssertionError("Certificate was authenticated");
@@ -904,15 +906,11 @@ public class SSLCertificateTest {
                 SslHandler handler = getSSLHandler(session);
                 SSLEngine sslEngine = getSSLEngine(session);
                 SSLEngineResult.HandshakeStatus handshakeStatus = sslEngine != null ? sslEngine.getHandshakeStatus() : null;
-
-                SSLSession engineSession = sslEngine.getSession();
-                SSLSession handshakeSession = getHandshakeSession(sslEngine);
-
-                LOGGER.info("SSL engine session [test_name={},session={},cert={},principal={}]", testNameRule.getTestName(), engineSession, getPeerCertificates(engineSession), getPeerPrincipal(engineSession));
-                LOGGER.info("SSL handshake session [test_name={},session={},cert={},principal={}]", testNameRule.getTestName(), handshakeSession, getPeerCertificates(handshakeSession), getPeerPrincipal(handshakeSession));
+                Boolean handlerOpen = handler != null ? handler.isOpen() : null;
+                Boolean handlerConnected = handler != null ? handler.isOpen() : null;
 
                 LOGGER.info("SSL session info [testName={},sessionID={},isLoggedOn={},sslSession={},peerCertificates={},localCertificates={},peerPrincipal={},exceptionMessage={},exceptionType={},handshakeStatus={},handler.connected={},handler.open={}]",
-                    testNameRule.getTestName(), sessionID, session.isLoggedOn(), sslSession, sslSession.getPeerCertificates(), sslSession.getLocalCertificates(), getPeerPrincipal(sslSession), exceptionMessage, exceptionType, handshakeStatus, handler.isConnected(), handler.isOpen());
+                    testNameRule.getTestName(), sessionID, session.isLoggedOn(), sslSession, sslSession.getPeerCertificates(), sslSession.getLocalCertificates(), getPeerPrincipal(sslSession), exceptionMessage, exceptionType, handshakeStatus, handlerConnected, handlerOpen);
             }
         }
     }
