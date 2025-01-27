@@ -13,8 +13,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-#        os: [ubuntu-latest, macOS-13]
-        os: [macOS-13]
+        os: [ubuntu-latest, macOS-13]
+#        os: [macOS-13]
         java: [8, 11, 17]
       fail-fast: false
       max-parallel: 4

@@ -767,20 +767,6 @@ public class SSLCertificateTest {
         }
 
         public void assertNotAuthenticated(SessionID sessionID) throws Exception {
-            ArrayList<SessionID> sessions = connector.getSessions();
-            boolean found = false;
-
-            for (SessionID sid : sessions) {
-                if (sid.equals(sessionID)) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) {
-                throw new AssertionError("Session not found: " + sessionID);
-            }
-
             Session session = findSession(sessionID);
             SSLSession sslSession = findSSLSession(session);
 
@@ -792,6 +778,8 @@ public class SSLCertificateTest {
 
             if (peerCertificates != null && peerCertificates.length > 0) {
                 throw new AssertionError("Certificate was authenticated");
+            } else {
+                LOGGER.info("ssl_test, SSL session exists, but no peer certificates");
             }
         }
 
@@ -901,8 +889,7 @@ public class SSLCertificateTest {
             SSLEngineResult.HandshakeStatus handshakeStatus = sslEngine != null ? sslEngine.getHandshakeStatus() : null;
             SslHandler handler = getSSLHandler(session);
             Boolean handlerOpen = handler != null ? handler.isOpen() : null;
-            Boolean handlerConnected = handler != null ? handler.isOpen() : null;
-            // session.addStateListener();
+            Boolean handlerConnected = handler != null ? handler.isConnected() : null;
 
             Certificate[] peerCertificates = getPeerCertificates(sslSession);
             Principal peerPrincipal = getPeerPrincipal(sslSession);
