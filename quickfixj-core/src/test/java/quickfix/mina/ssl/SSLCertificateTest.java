@@ -21,8 +21,10 @@ package quickfix.mina.ssl;
 
 import org.apache.mina.core.filterchain.IoFilterAdapter;
 import org.apache.mina.core.filterchain.IoFilterChain;
+import org.apache.mina.core.session.AttributeKey;
 import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.ssl.SslFilter;
+import org.apache.mina.filter.ssl.SslHandler;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -47,6 +49,8 @@ import quickfix.mina.IoSessionResponder;
 import quickfix.mina.ProtocolFactory;
 import quickfix.mina.SessionConnector;
 
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLEngineResult;
 import javax.net.ssl.SSLHandshakeException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
@@ -443,14 +447,14 @@ public class SSLCertificateTest {
                 initiator2.start();
                 initiator3.start();
 
-                Thread.sleep(4_000);
-
                 LOGGER.info("SSL INFO BEFORE [testName={}]", testNameRule.getTestName());
                 initiator1.logSSLInfo();
                 initiator2.logSSLInfo();
                 initiator3.logSSLInfo();
                 acceptor.logSSLInfo();
                 LOGGER.info("SSL INFO AFTER [testName={}]", testNameRule.getTestName());
+
+                Thread.sleep(4_000);
 
                 initiator1.assertSslExceptionThrown();
                 initiator1.assertNotLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU0", "ALFA0"));
@@ -560,6 +564,11 @@ public class SSLCertificateTest {
             try {
                 initiator.start();
 
+                LOGGER.info("SSL INFO BEFORE [testName={}]", testNameRule.getTestName());
+                initiator.logSSLInfo();
+                acceptor.logSSLInfo();
+                LOGGER.info("SSL INFO AFTER [testName={}]", testNameRule.getTestName());
+
                 initiator.assertSslExceptionThrown();
                 initiator.assertNotLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
                 initiator.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
@@ -621,6 +630,11 @@ public class SSLCertificateTest {
 
             try {
                 initiator.start();
+
+                LOGGER.info("SSL INFO BEFORE [testName={}]", testNameRule.getTestName());
+                initiator.logSSLInfo();
+                acceptor.logSSLInfo();
+                LOGGER.info("SSL INFO AFTER [testName={}]", testNameRule.getTestName());
 
                 initiator.assertSslExceptionThrown();
                 initiator.assertNotLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
@@ -713,21 +727,6 @@ public class SSLCertificateTest {
 
         public abstract SessionConnector createConnector(SessionSettings sessionSettings) throws ConfigError;
 
-        private SSLSession findSSLSession(Session session) throws Exception {
-            IoSession ioSession = findIoSession(session);
-
-            if (ioSession == null)
-                return null;
-
-            IoFilterChain filterChain = ioSession.getFilterChain();
-            SslFilter sslFilter = (SslFilter) filterChain.get(SSLSupport.FILTER_NAME);
-
-            if (sslFilter == null)
-                return null;
-
-            return (SSLSession) ioSession.getAttribute(SslFilter.SSL_SECURED);
-        }
-
         private Session findSession(SessionID sessionID) {
             for (Session session : connector.getManagedSessions()) {
                 if (session.getSessionID().equals(sessionID))
@@ -735,18 +734,6 @@ public class SSLCertificateTest {
             }
 
             return null;
-        }
-
-        private IoSession findIoSession(Session session) throws Exception {
-            IoSessionResponder ioSessionResponder = (IoSessionResponder) session.getResponder();
-
-            if (ioSessionResponder == null)
-                return null;
-
-            Field field = IoSessionResponder.class.getDeclaredField("ioSession");
-            field.setAccessible(true);
-
-            return (IoSession) field.get(ioSessionResponder);
         }
 
         public void assertAuthenticated(SessionID sessionID, BigInteger serialNumber) throws Exception {
@@ -870,9 +857,11 @@ public class SSLCertificateTest {
                 Throwable exception = this.exception.get();
                 String exceptionMessage = exception != null ? exception.getMessage() : null;
                 Class<?> exceptionType = exception != null ? exception.getClass() : null;
+                SSLEngine sslEngine = getSSLEngine(session);
+                SSLEngineResult.HandshakeStatus handshakeStatus = sslEngine != null ? sslEngine.getHandshakeStatus() : null;
 
-                LOGGER.info("SSL session info [testName={},sessionID={},isLoggedOn={},sslSession={},peerCertificates={},localCertificates={},peerPrincipal={},exceptionMessage={},exceptionType={}]",
-                    testNameRule.getTestName(), sessionID, session.isLoggedOn(), sslSession, sslSession.getPeerCertificates(), sslSession.getLocalCertificates(), getPeerPrincipal(sslSession), exceptionMessage, exceptionType);
+                LOGGER.info("SSL session info [testName={},sessionID={},isLoggedOn={},sslSession={},peerCertificates={},localCertificates={},peerPrincipal={},exceptionMessage={},exceptionType={},handshakeStatus={}]",
+                    testNameRule.getTestName(), sessionID, session.isLoggedOn(), sslSession, sslSession.getPeerCertificates(), sslSession.getLocalCertificates(), getPeerPrincipal(sslSession), exceptionMessage, exceptionType, handshakeStatus);
             }
         }
     }
@@ -1128,5 +1117,59 @@ public class SSLCertificateTest {
         } catch (SSLPeerUnverifiedException e) {
             return null;
         }
+    }
+
+    public static IoSession findIoSession(Session session) throws Exception {
+        IoSessionResponder ioSessionResponder = (IoSessionResponder) session.getResponder();
+
+        if (ioSessionResponder == null)
+            return null;
+
+        Field field = IoSessionResponder.class.getDeclaredField("ioSession");
+        field.setAccessible(true);
+
+        return (IoSession) field.get(ioSessionResponder);
+    }
+
+    public static SSLSession findSSLSession(Session session) throws Exception {
+        IoSession ioSession = findIoSession(session);
+
+        if (ioSession == null)
+            return null;
+
+        IoFilterChain filterChain = ioSession.getFilterChain();
+        SslFilter sslFilter = (SslFilter) filterChain.get(SSLSupport.FILTER_NAME);
+
+        if (sslFilter == null)
+            return null;
+
+        return (SSLSession) ioSession.getAttribute(SslFilter.SSL_SECURED);
+    }
+
+    private static SSLEngine getSSLEngine(Session session) throws Exception {
+        IoSession ioSession = findIoSession(session);
+
+        if (ioSession == null) {
+            return null;
+        }
+
+        IoFilterChain filterChain = ioSession.getFilterChain();
+        SslFilter sslFilter = (SslFilter) filterChain.get(SSLSupport.FILTER_NAME);
+
+        if (sslFilter == null) {
+            return null;
+        }
+
+        AttributeKey sslHandlerKey = new AttributeKey(SslHandler.class, "handler");
+        SslHandler sslHandler = (SslHandler) ioSession.getAttribute(sslHandlerKey);
+
+        if (sslHandler == null) {
+            return null;
+        }
+
+        Field engineField = sslHandler.getClass().getSuperclass().getDeclaredField("mEngine");
+        engineField.setAccessible(true);
+
+        return (SSLEngine) engineField.get(sslHandler);
     }
 }
