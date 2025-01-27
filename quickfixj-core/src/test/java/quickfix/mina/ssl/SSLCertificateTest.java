@@ -19,6 +19,7 @@
 
 package quickfix.mina.ssl;
 
+import io.netty.handler.ssl.SslClientHelloHandler;
 import org.apache.mina.core.filterchain.IoFilterAdapter;
 import org.apache.mina.core.filterchain.IoFilterChain;
 import org.apache.mina.core.session.AttributeKey;
@@ -462,13 +463,6 @@ public class SSLCertificateTest {
                 initiator2.start();
                 initiator3.start();
 
-                LOGGER.info("SSL INFO BEFORE [testName={}]", testNameRule.getTestName());
-                initiator1.logSSLInfo();
-                initiator2.logSSLInfo();
-                initiator3.logSSLInfo();
-                acceptor.logSSLInfo();
-                LOGGER.info("SSL INFO AFTER [testName={}]", testNameRule.getTestName());
-
                 // Thread.sleep(4_000);
 
                 initiator1.assertSslExceptionThrown();
@@ -585,11 +579,6 @@ public class SSLCertificateTest {
 
                 Thread.sleep(4_000);
 
-                LOGGER.info("SSL INFO BEFORE [testName={}]", testNameRule.getTestName());
-                initiator.logSSLInfo();
-                acceptor.logSSLInfo();
-                LOGGER.info("SSL INFO AFTER [testName={}]", testNameRule.getTestName());
-
                 initiator.assertSslExceptionThrown();
                 initiator.assertNotLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
                 initiator.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
@@ -653,11 +642,6 @@ public class SSLCertificateTest {
 
             try {
                 initiator.start();
-
-                LOGGER.info("SSL INFO BEFORE [testName={}]", testNameRule.getTestName());
-                initiator.logSSLInfo();
-                acceptor.logSSLInfo();
-                LOGGER.info("SSL INFO AFTER [testName={}]", testNameRule.getTestName());
 
                 Thread.sleep(4_000);
 
@@ -800,21 +784,11 @@ public class SSLCertificateTest {
             Session session = findSession(sessionID);
             SSLSession sslSession = findSSLSession(session);
 
-            LOGGER.info("assertNotAuthenticated [testName={},sessionId={}]",
-                SSLCertificateTest.this.testNameRule.getTestName(), sessionID);
-
             if (sslSession == null)
                 return;
 
             Certificate[] peerCertificates = getPeerCertificates(sslSession);
-            SSLEngine sslEngine = getSSLEngine(session);
-            SslHandler sslHandler = getSSLHandler(session);
-            SSLEngineResult.HandshakeStatus handshakeStatus = sslEngine != null ? sslEngine.getHandshakeStatus() : null;
-            Boolean handlerOpen = sslHandler != null ? sslHandler.isOpen() : null;
-            Boolean handlerConnected = sslHandler != null ? sslHandler.isConnected() : null;
-
-            LOGGER.info("assertNotAuthenticated [testName={},sessionId={},session={},sslSession={},peerCertificates={},peerPrincipal={},handshakeStatus={},handlerConnected={},handlerOpen={}]",
-                SSLCertificateTest.this.testNameRule.getTestName(), sessionID, session, sslSession, peerCertificates, getPeerPrincipal(sslSession), handshakeStatus, handlerConnected, handlerOpen);
+            logSSLInfo("ASSERT_NO_AUTH", sessionID);
 
             if (peerCertificates != null && peerCertificates.length > 0) {
                 throw new AssertionError("Certificate was authenticated");
@@ -873,7 +847,7 @@ public class SSLCertificateTest {
 
         public void stop() {
             try {
-                logSSLInfo();
+                logSSLInfo("STOP");
             } catch (Exception e) {
                 LOGGER.error("Failed to log SSL info", e);
             }
@@ -881,37 +855,52 @@ public class SSLCertificateTest {
             connector.stop();
         }
 
-        public void logSSLInfo() throws Exception {
+        public void logSSLInfo(String scope) throws Exception {
             List<SessionID> sessionsIDs = connector.getSessions();
-            LOGGER.info("All SSL sessions [testName={},sessionIDs={}]", testNameRule.getTestName(), sessionsIDs);
+            LOGGER.info("All SSL sessions [testName={},scope={},sessionIDs={}]", testNameRule.getTestName(), scope, sessionsIDs);
 
             for (SessionID sessionID : sessionsIDs) {
-                Session session = findSession(sessionID);
-
-                if (session == null) {
-                    LOGGER.info("No session found [testName={},sessionID={}]", testNameRule.getTestName(), sessionID);
-                    continue;
-                }
-
-                SSLSession sslSession = findSSLSession(session);
-
-                if (sslSession == null) {
-                    LOGGER.info("No SSL session found [testName={},session={}]", testNameRule.getTestName(), session);
-                    continue;
-                }
-
-                Throwable exception = this.exception.get();
-                String exceptionMessage = exception != null ? exception.getMessage() : null;
-                Class<?> exceptionType = exception != null ? exception.getClass() : null;
-                SslHandler handler = getSSLHandler(session);
-                SSLEngine sslEngine = getSSLEngine(session);
-                SSLEngineResult.HandshakeStatus handshakeStatus = sslEngine != null ? sslEngine.getHandshakeStatus() : null;
-                Boolean handlerOpen = handler != null ? handler.isOpen() : null;
-                Boolean handlerConnected = handler != null ? handler.isOpen() : null;
-
-                LOGGER.info("SSL session info [testName={},sessionID={},isLoggedOn={},sslSession={},peerCertificates={},localCertificates={},peerPrincipal={},exceptionMessage={},exceptionType={},handshakeStatus={},handler.connected={},handler.open={}]",
-                    testNameRule.getTestName(), sessionID, session.isLoggedOn(), sslSession, sslSession.getPeerCertificates(), sslSession.getLocalCertificates(), getPeerPrincipal(sslSession), exceptionMessage, exceptionType, handshakeStatus, handlerConnected, handlerOpen);
+                logSSLInfo(scope, sessionID);
             }
+        }
+
+        public void logSSLInfo(String scope, SessionID sessionID) throws Exception {
+            Session session = findSession(sessionID);
+
+            if (session == null) {
+                LOGGER.info("No session found [testName={},scope={},sessionID={}]", testNameRule.getTestName(), scope, sessionID);
+                return;
+            }
+
+            SSLSession sslSession = findSSLSession(session);
+
+            if (sslSession == null) {
+                LOGGER.info("No SSL session found [testName={},scope={},session={}]", testNameRule.getTestName(), scope, session);
+                return;
+            }
+
+            Throwable exception = this.exception.get();
+            String exceptionMessage = exception != null ? exception.getMessage() : null;
+            Class<?> exceptionType = exception != null ? exception.getClass() : null;
+            SslHandler handler = getSSLHandler(session);
+            SSLEngine sslEngine = getSSLEngine(session);
+            SSLEngineResult.HandshakeStatus handshakeStatus = sslEngine != null ? sslEngine.getHandshakeStatus() : null;
+            Boolean handlerOpen = handler != null ? handler.isOpen() : null;
+            Boolean handlerConnected = handler != null ? handler.isOpen() : null;
+
+            Certificate[] peerCertificates = getPeerCertificates(sslSession);
+            Principal peerPrincipal = getPeerPrincipal(sslSession);
+
+            SSLSession engineSession = sslEngine != null ? sslEngine.getSession() : null;
+            Boolean engineSessionValid = engineSession != null ? engineSession.isValid() : null;
+
+            SSLSession handshakeSession = sslEngine != null ? sslEngine.getHandshakeSession() : null;
+            Boolean handshakeSessionValid = handshakeSession != null ? handshakeSession.isValid() : null;
+
+            LOGGER.info("SSL session info [testName={},scope={},sessionID={},isLoggedOn={},sslSession={},peerCertificates={},peerPrincipal={},exceptionMessage={},exceptionType={}," +
+                    "handshakeStatus={},handler.connected={},handler.open={},engineSession={},engineSession.valid={},handshakeSession={},handshakeSessionValid={}]",
+                testNameRule.getTestName(), scope, sessionID, session.isLoggedOn(), sslSession, peerCertificates, peerPrincipal, exceptionMessage, exceptionType,
+                handshakeStatus, handlerConnected, handlerOpen, engineSession, engineSessionValid, handshakeSession, handshakeSessionValid);
         }
     }
 
