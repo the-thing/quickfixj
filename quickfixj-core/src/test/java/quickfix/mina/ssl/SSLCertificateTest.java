@@ -764,6 +764,8 @@ public class SSLCertificateTest {
 
                 if (peerCertificates != null && peerCertificates.length > 0) {
                     throw new AssertionError("Certificate was authenticated");
+                } else {
+                    LOGGER.info("ssl_test, ssl session is alive, but no certificates");
                 }
             } catch (SSLPeerUnverifiedException e) {
             }
