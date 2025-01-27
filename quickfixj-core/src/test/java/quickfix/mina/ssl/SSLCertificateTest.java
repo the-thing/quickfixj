@@ -110,6 +110,8 @@ public class SSLCertificateTest {
             try {
                 initiator.start();
 
+                Thread.sleep(4_000);
+
                 initiator.assertNoSslExceptionThrown();
                 initiator.assertLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
                 initiator.assertAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"),
@@ -171,6 +173,8 @@ public class SSLCertificateTest {
 
                 try {
                     initiator.start();
+
+                    Thread.sleep(4_000);
 
                     initiator.assertNoSslExceptionThrown();
                     initiator.assertLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
@@ -244,6 +248,8 @@ public class SSLCertificateTest {
             try {
                 initiator.start();
 
+                Thread.sleep(4_000);
+
                 initiator.assertNoSslExceptionThrown();
                 initiator.assertLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
                 initiator.assertAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"),
@@ -280,6 +286,8 @@ public class SSLCertificateTest {
             try {
                 initiator.start();
 
+                Thread.sleep(4_000);
+
                 initiator.assertSslExceptionThrown("No name matching localhost found", SSLHandshakeException.class);
                 initiator.assertNotLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
                 initiator.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
@@ -310,6 +318,8 @@ public class SSLCertificateTest {
 
             try {
                 initiator.start();
+
+                Thread.sleep(4_000);
 
                 initiator.assertNoSslExceptionThrown();
                 initiator.assertLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
@@ -344,6 +354,8 @@ public class SSLCertificateTest {
 
             try {
                 initiator.start();
+
+                Thread.sleep(4_000);
 
                 initiator.assertNoSslExceptionThrown();
                 initiator.assertLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
@@ -386,6 +398,8 @@ public class SSLCertificateTest {
                 initiator1.start();
                 initiator2.start();
                 initiator3.start();
+
+                Thread.sleep(4_000);
 
                 initiator1.assertNoSslExceptionThrown();
                 initiator1.assertLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU0", "ALFA0"));
@@ -503,6 +517,8 @@ public class SSLCertificateTest {
             try {
                 initiator.start();
 
+                Thread.sleep(4_000);
+
                 initiator.assertSslExceptionThrown();
                 initiator.assertNotLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
                 initiator.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
@@ -534,6 +550,8 @@ public class SSLCertificateTest {
             try {
                 initiator.start();
 
+                Thread.sleep(4_000);
+
                 initiator.assertSslExceptionThrown();
                 initiator.assertNotLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
                 initiator.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
@@ -564,6 +582,8 @@ public class SSLCertificateTest {
 
             try {
                 initiator.start();
+
+                Thread.sleep(4_000);
 
                 LOGGER.info("SSL INFO BEFORE [testName={}]", testNameRule.getTestName());
                 initiator.logSSLInfo();
@@ -601,6 +621,8 @@ public class SSLCertificateTest {
             try {
                 initiator.start();
 
+                Thread.sleep(4_000);
+
                 initiator.assertSslExceptionThrown();
                 initiator.assertNotLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
                 initiator.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
@@ -637,6 +659,8 @@ public class SSLCertificateTest {
                 acceptor.logSSLInfo();
                 LOGGER.info("SSL INFO AFTER [testName={}]", testNameRule.getTestName());
 
+                Thread.sleep(4_000);
+
                 initiator.assertSslExceptionThrown();
                 initiator.assertNotLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
                 initiator.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
@@ -670,6 +694,8 @@ public class SSLCertificateTest {
             try {
                 sslInitiator.start();
                 nonSslInitiator.start();
+
+                Thread.sleep(4_000);
 
                 sslInitiator.assertNoSslExceptionThrown();
                 sslInitiator.assertLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU_SSL", "ALFA_SSL"));
@@ -874,11 +900,12 @@ public class SSLCertificateTest {
                 Throwable exception = this.exception.get();
                 String exceptionMessage = exception != null ? exception.getMessage() : null;
                 Class<?> exceptionType = exception != null ? exception.getClass() : null;
+                SslHandler handler = getSSLHandler(session);
                 SSLEngine sslEngine = getSSLEngine(session);
                 SSLEngineResult.HandshakeStatus handshakeStatus = sslEngine != null ? sslEngine.getHandshakeStatus() : null;
 
-                LOGGER.info("SSL session info [testName={},sessionID={},isLoggedOn={},sslSession={},peerCertificates={},localCertificates={},peerPrincipal={},exceptionMessage={},exceptionType={},handshakeStatus={}]",
-                    testNameRule.getTestName(), sessionID, session.isLoggedOn(), sslSession, sslSession.getPeerCertificates(), sslSession.getLocalCertificates(), getPeerPrincipal(sslSession), exceptionMessage, exceptionType, handshakeStatus);
+                LOGGER.info("SSL session info [testName={},sessionID={},isLoggedOn={},sslSession={},peerCertificates={},localCertificates={},peerPrincipal={},exceptionMessage={},exceptionType={},handshakeStatus={},handler.connected={},handler.open={}]",
+                    testNameRule.getTestName(), sessionID, session.isLoggedOn(), sslSession, sslSession.getPeerCertificates(), sslSession.getLocalCertificates(), getPeerPrincipal(sslSession), exceptionMessage, exceptionType, handshakeStatus, handler.isConnected(), handler.isOpen());
             }
         }
     }
@@ -1163,7 +1190,7 @@ public class SSLCertificateTest {
         return (SSLSession) ioSession.getAttribute(SslFilter.SSL_SECURED);
     }
 
-    private static SSLEngine getSSLEngine(Session session) throws Exception {
+    private static SslHandler getSSLHandler(Session session) throws Exception {
         IoSession ioSession = findIoSession(session);
 
         if (ioSession == null) {
@@ -1179,6 +1206,12 @@ public class SSLCertificateTest {
 
         AttributeKey sslHandlerKey = new AttributeKey(SslHandler.class, "handler");
         SslHandler sslHandler = (SslHandler) ioSession.getAttribute(sslHandlerKey);
+
+        return sslHandler;
+    }
+
+    private static SSLEngine getSSLEngine(Session session) throws Exception {
+        SslHandler sslHandler = getSSLHandler(session);
 
         if (sslHandler == null) {
             return null;
