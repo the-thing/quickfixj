@@ -469,7 +469,7 @@ public class SSLCertificateTest {
                 acceptor.logSSLInfo();
                 LOGGER.info("SSL INFO AFTER [testName={}]", testNameRule.getTestName());
 
-                Thread.sleep(4_000);
+                // Thread.sleep(4_000);
 
                 initiator1.assertSslExceptionThrown();
                 initiator1.assertNotLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU0", "ALFA0"));
