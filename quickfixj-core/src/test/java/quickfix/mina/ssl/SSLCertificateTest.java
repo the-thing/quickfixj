@@ -59,6 +59,7 @@ import java.math.BigInteger;
 import java.security.Principal;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -756,6 +757,20 @@ public class SSLCertificateTest {
         }
 
         public void assertNotAuthenticated(SessionID sessionID) throws Exception {
+            ArrayList<SessionID> sessions = connector.getSessions();
+            boolean found = false;
+
+            for (SessionID sid : sessions) {
+                if (sid.equals(sessionID)) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                throw new AssertionError("Session not found: " + sessionID);
+            }
+
             Session session = findSession(sessionID);
             SSLSession sslSession = findSSLSession(session);
 
@@ -766,9 +781,11 @@ public class SSLCertificateTest {
                 return;
 
             Certificate[] peerCertificates = getPeerCertificates(sslSession);
+            SSLEngine sslEngine = getSSLEngine(session);
+            SSLEngineResult.HandshakeStatus handshakeStatus = sslEngine != null ? sslEngine.getHandshakeStatus() : null;
 
-            LOGGER.info("assertNotAuthenticated [testName={},sessionId={},session={},sslSession={},peerCertificates={},peerPrincipal={}]",
-                SSLCertificateTest.this.testNameRule.getTestName(), sessionID, session, sslSession, peerCertificates, getPeerPrincipal(sslSession));
+            LOGGER.info("assertNotAuthenticated [testName={},sessionId={},session={},sslSession={},peerCertificates={},peerPrincipal={},handshakeStatus={}]",
+                SSLCertificateTest.this.testNameRule.getTestName(), sessionID, session, sslSession, peerCertificates, getPeerPrincipal(sslSession), handshakeStatus);
 
             if (peerCertificates != null && peerCertificates.length > 0) {
                 throw new AssertionError("Certificate was authenticated");
