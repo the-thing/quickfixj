@@ -111,8 +111,6 @@ public class SSLCertificateTest {
             try {
                 initiator.start();
 
-                Thread.sleep(4_000);
-
                 initiator.assertNoSslExceptionThrown();
                 initiator.assertLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
                 initiator.assertAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"),
@@ -120,7 +118,7 @@ public class SSLCertificateTest {
 
                 acceptor.assertNoSslExceptionThrown();
                 acceptor.assertLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ALFA", "ZULU"));
-                acceptor.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ALFA", "ZULU"));
+                acceptor.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ALFA", "ZULU"), false);
             } finally {
                 initiator.stop();
             }
@@ -175,15 +173,13 @@ public class SSLCertificateTest {
                 try {
                     initiator.start();
 
-                    Thread.sleep(4_000);
-
                     initiator.assertNoSslExceptionThrown();
                     initiator.assertLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
                     initiator.assertAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"), new BigInteger("1448538842"));
 
                     acceptor.assertNoSslExceptionThrown();
                     acceptor.assertLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ALFA", "ZULU"));
-                    acceptor.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ALFA", "ZULU"));
+                    acceptor.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ALFA", "ZULU"), false);
                 } finally {
                     initiator.stop();
                 }
@@ -221,7 +217,7 @@ public class SSLCertificateTest {
 
                 acceptor.assertNoSslExceptionThrown();
                 acceptor.assertLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ALFA", "ZULU"));
-                acceptor.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ALFA", "ZULU"));
+                acceptor.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ALFA", "ZULU"), false);
             } finally {
                 initiator.stop();
             }
@@ -249,8 +245,6 @@ public class SSLCertificateTest {
             try {
                 initiator.start();
 
-                Thread.sleep(4_000);
-
                 initiator.assertNoSslExceptionThrown();
                 initiator.assertLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
                 initiator.assertAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"),
@@ -258,7 +252,7 @@ public class SSLCertificateTest {
 
                 acceptor.assertNoSslExceptionThrown();
                 acceptor.assertLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ALFA", "ZULU"));
-                acceptor.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ALFA", "ZULU"));
+                acceptor.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ALFA", "ZULU"), false);
             } finally {
                 initiator.stop();
             }
@@ -286,8 +280,6 @@ public class SSLCertificateTest {
 
             try {
                 initiator.start();
-
-                Thread.sleep(4_000);
 
                 initiator.assertSslExceptionThrown("No name matching localhost found", SSLHandshakeException.class);
                 initiator.assertNotLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
@@ -319,8 +311,6 @@ public class SSLCertificateTest {
 
             try {
                 initiator.start();
-
-                Thread.sleep(4_000);
 
                 initiator.assertNoSslExceptionThrown();
                 initiator.assertLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
@@ -355,8 +345,6 @@ public class SSLCertificateTest {
 
             try {
                 initiator.start();
-
-                Thread.sleep(4_000);
 
                 initiator.assertNoSslExceptionThrown();
                 initiator.assertLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
@@ -399,8 +387,6 @@ public class SSLCertificateTest {
                 initiator1.start();
                 initiator2.start();
                 initiator3.start();
-
-                Thread.sleep(4_000);
 
                 initiator1.assertNoSslExceptionThrown();
                 initiator1.assertLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU0", "ALFA0"));
@@ -463,8 +449,6 @@ public class SSLCertificateTest {
                 initiator2.start();
                 initiator3.start();
 
-                // Thread.sleep(4_000);
-
                 initiator1.assertSslExceptionThrown();
                 initiator1.assertNotLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU0", "ALFA0"));
                 initiator1.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU0", "ALFA0"));
@@ -511,8 +495,6 @@ public class SSLCertificateTest {
             try {
                 initiator.start();
 
-                Thread.sleep(4_000);
-
                 initiator.assertSslExceptionThrown();
                 initiator.assertNotLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
                 initiator.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
@@ -543,8 +525,6 @@ public class SSLCertificateTest {
 
             try {
                 initiator.start();
-
-                Thread.sleep(4_000);
 
                 initiator.assertSslExceptionThrown();
                 initiator.assertNotLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
@@ -577,8 +557,6 @@ public class SSLCertificateTest {
             try {
                 initiator.start();
 
-                Thread.sleep(4_000);
-
                 initiator.assertSslExceptionThrown();
                 initiator.assertNotLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
                 initiator.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
@@ -610,8 +588,6 @@ public class SSLCertificateTest {
             try {
                 initiator.start();
 
-                Thread.sleep(4_000);
-
                 initiator.assertSslExceptionThrown();
                 initiator.assertNotLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
                 initiator.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
@@ -642,8 +618,6 @@ public class SSLCertificateTest {
 
             try {
                 initiator.start();
-
-                Thread.sleep(4_000);
 
                 initiator.assertSslExceptionThrown();
                 initiator.assertNotLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU", "ALFA"));
@@ -679,8 +653,6 @@ public class SSLCertificateTest {
                 sslInitiator.start();
                 nonSslInitiator.start();
 
-                Thread.sleep(4_000);
-
                 sslInitiator.assertNoSslExceptionThrown();
                 sslInitiator.assertLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU_SSL", "ALFA_SSL"));
                 sslInitiator.assertAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU_SSL", "ALFA_SSL"),
@@ -688,7 +660,7 @@ public class SSLCertificateTest {
 
                 acceptor.assertNoSslExceptionThrown();
                 acceptor.assertLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ALFA_SSL", "ZULU_SSL"));
-                acceptor.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ALFA_SSL", "ZULU_SSL"));
+                acceptor.assertNotAuthenticated(new SessionID(FixVersions.BEGINSTRING_FIX44, "ALFA_SSL", "ZULU_SSL"), false);
 
                 nonSslInitiator.assertNoSslExceptionThrown();
                 nonSslInitiator.assertLoggedOn(new SessionID(FixVersions.BEGINSTRING_FIX44, "ZULU_NON_SSL", "ALFA_NON_SSL"));
@@ -767,19 +739,36 @@ public class SSLCertificateTest {
         }
 
         public void assertNotAuthenticated(SessionID sessionID) throws Exception {
+            assertNotAuthenticated(sessionID, true);
+        }
+
+        public void assertNotAuthenticated(SessionID sessionID, boolean authOn) throws Exception {
             Session session = findSession(sessionID);
             SSLSession sslSession = findSSLSession(session);
 
             if (sslSession == null)
                 return;
 
-            Certificate[] peerCertificates = getPeerCertificates(sslSession);
             logSSLInfo("ASSERT_NO_AUTH", sessionID);
 
-            if (peerCertificates != null && peerCertificates.length > 0) {
-                throw new AssertionError("Certificate was authenticated");
+            if (authOn) {
+                // when auth is on the ssl may linger
+                long startTime = System.nanoTime();
+
+                while (findSSLSession(session) != null) {
+                    Thread.sleep(100);
+
+                    if (TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime) >= TIMEOUT_SECONDS) {
+                        throw new AssertionError("SSL session still exists for session: " + sessionID);
+                    }
+                }
             } else {
-                LOGGER.info("ssl_test, SSL session exists, but no peer certificates");
+                // if authentication is not enabled, there will be no peer certificates
+                Certificate[] peerCertificates = getPeerCertificates(sslSession);
+
+                if (peerCertificates != null && peerCertificates.length > 0) {
+                    throw new AssertionError("Certificate was authenticated");
+                }
             }
         }
 
