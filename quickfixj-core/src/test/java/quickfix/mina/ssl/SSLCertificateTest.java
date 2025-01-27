@@ -19,7 +19,6 @@
 
 package quickfix.mina.ssl;
 
-import io.netty.handler.ssl.SslClientHelloHandler;
 import org.apache.mina.core.filterchain.IoFilterAdapter;
 import org.apache.mina.core.filterchain.IoFilterChain;
 import org.apache.mina.core.session.AttributeKey;
@@ -63,6 +62,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -872,6 +872,21 @@ public class SSLCertificateTest {
                 return;
             }
 
+            IoSession ioSession = findIoSession(session);
+
+            if (ioSession != null) {
+                Map<Object, Object> attributes = new HashMap<>();
+
+                for (Object attributeKey : ioSession.getAttributeKeys()) {
+                    Object value = ioSession.getAttribute(attributeKey);
+                    attributes.put(attributeKey, value);
+                }
+
+                LOGGER.info("IO session info [testName={},scope={},attributes={}," +
+                        "active={},connected={},bothIdle={},closing={},secured={},readerIdle={},readerSuspended={},writerIdle={},writerSuspended={}]", testNameRule.getTestName(), scope, attributes,
+                    ioSession.isActive(), ioSession.isConnected(), ioSession.isBothIdle(), ioSession.isClosing(), ioSession.isSecured(), ioSession.isReaderIdle(), ioSession.isReadSuspended(), ioSession.isWriterIdle(), ioSession.isWriteSuspended());
+            }
+
             SSLSession sslSession = findSSLSession(session);
 
             if (sslSession == null) {
@@ -882,25 +897,20 @@ public class SSLCertificateTest {
             Throwable exception = this.exception.get();
             String exceptionMessage = exception != null ? exception.getMessage() : null;
             Class<?> exceptionType = exception != null ? exception.getClass() : null;
-            SslHandler handler = getSSLHandler(session);
             SSLEngine sslEngine = getSSLEngine(session);
             SSLEngineResult.HandshakeStatus handshakeStatus = sslEngine != null ? sslEngine.getHandshakeStatus() : null;
+            SslHandler handler = getSSLHandler(session);
             Boolean handlerOpen = handler != null ? handler.isOpen() : null;
             Boolean handlerConnected = handler != null ? handler.isOpen() : null;
+            // session.addStateListener();
 
             Certificate[] peerCertificates = getPeerCertificates(sslSession);
             Principal peerPrincipal = getPeerPrincipal(sslSession);
 
-            SSLSession engineSession = sslEngine != null ? sslEngine.getSession() : null;
-            Boolean engineSessionValid = engineSession != null ? engineSession.isValid() : null;
-
-            SSLSession handshakeSession = sslEngine != null ? sslEngine.getHandshakeSession() : null;
-            Boolean handshakeSessionValid = handshakeSession != null ? handshakeSession.isValid() : null;
-
             LOGGER.info("SSL session info [testName={},scope={},sessionID={},isLoggedOn={},sslSession={},peerCertificates={},peerPrincipal={},exceptionMessage={},exceptionType={}," +
-                    "handshakeStatus={},handler.connected={},handler.open={},engineSession={},engineSession.valid={},handshakeSession={},handshakeSessionValid={}]",
+                    "handshakeStatus={},handler={},handler.connected={},handler.open={}]",
                 testNameRule.getTestName(), scope, sessionID, session.isLoggedOn(), sslSession, peerCertificates, peerPrincipal, exceptionMessage, exceptionType,
-                handshakeStatus, handlerConnected, handlerOpen, engineSession, engineSessionValid, handshakeSession, handshakeSessionValid);
+                handshakeStatus, handler, handlerConnected, handlerOpen);
         }
     }
 
