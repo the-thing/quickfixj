@@ -25,7 +25,6 @@ import org.burningwave.tools.net.DefaultHostResolver;
 import org.burningwave.tools.net.HostResolutionRequestInterceptor;
 import org.burningwave.tools.net.MappedHostResolver;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
