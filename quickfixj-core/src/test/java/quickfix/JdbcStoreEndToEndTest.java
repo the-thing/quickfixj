@@ -8,7 +8,7 @@ import quickfix.mina.ProtocolFactory;
 
 public class JdbcStoreEndToEndTest {
 
-    private static SessionSettings createInitiatorSettings(int connectPort) {
+    private static SessionSettings createInitiatorSettings(int connectPort, int dbPort) {
         SessionID sessionID = new SessionID(FixVersions.BEGINSTRING_FIX44, "JDBC_INITIATOR", "JDBC_ACCEPTOR");
 
         SessionSettings sessionSettings = new SessionSettings();
@@ -21,6 +21,12 @@ public class JdbcStoreEndToEndTest {
         sessionSettings.setString(Session.SETTING_START_TIME, "00:00:00");
         sessionSettings.setString(Session.SETTING_END_TIME, "00:00:00");
         sessionSettings.setString(Session.SETTING_HEARTBTINT, "30");
+
+        sessionSettings.setString(JdbcSetting.SETTING_JDBC_DRIVER, "org.hsqldb.jdbcDriver");
+        sessionSettings.setString(JdbcSetting.SETTING_JDBC_CONNECTION_URL, "jdbc:hsqldb:hsql://127.0.0.1:" + dbPort + "/quickfix-jdbc-test");
+        sessionSettings.setString(JdbcSetting.SETTING_JDBC_USER, "SA");
+        sessionSettings.setString(JdbcSetting.SETTING_JDBC_PASSWORD, "");
+        sessionSettings.setString(JdbcSetting.SETTING_JDBC_CONNECTION_TEST_QUERY, "CALL NOW()");
 
         sessionSettings.setString(sessionID, SessionSettings.BEGINSTRING, FixVersions.BEGINSTRING_FIX44);
         sessionSettings.setString(sessionID, Session.SETTING_DATA_DICTIONARY, "FIX44.xml");
@@ -55,38 +61,37 @@ public class JdbcStoreEndToEndTest {
 
     @Test
     public void foo() throws ConfigError, InterruptedException {
-        int port = AvailablePortFinder.getNextAvailable();
+        int connectPort = AvailablePortFinder.getNextAvailable();
 
-        ThreadedSocketAcceptor acceptor = new ThreadedSocketAcceptor(new ApplicationAdapter(), new MemoryStoreFactory(), createAcceptorSettings(port), new DefaultMessageFactory());
+        ThreadedSocketAcceptor acceptor = new ThreadedSocketAcceptor(new ApplicationAdapter(), new MemoryStoreFactory(), createAcceptorSettings(connectPort), new DefaultMessageFactory());
         acceptor.start();
 
         try {
             int dbPort = AvailablePortFinder.getNextAvailable();
 
             Server dbServer = new Server();
-            dbServer.setDatabaseName(0, "mainDb");
-            dbServer.setDatabasePath(0, "mem:mainDb");
+            dbServer.setDatabaseName(0, "quickfix-jdbc-test");
+            dbServer.setDatabasePath(0, "mem:quickfix-jdbc-test");
+            dbServer.setAddress("127.0.0.1");
             dbServer.setPort(dbPort);
             dbServer.start();
 
             try {
+                SessionSettings initiatorSettings = createInitiatorSettings(connectPort, dbPort);
+                JdbcStoreFactory storeFactory = new JdbcStoreFactory(initiatorSettings);
 
+                ThreadedSocketInitiator initiator = new ThreadedSocketInitiator(new ApplicationAdapter(), storeFactory, initiatorSettings, new DefaultMessageFactory());
+                initiator.start();
+
+                try {
+                    Thread.sleep(2_000);
+                    System.out.println("ml_test = " + initiator.isLoggedOn());
+                } finally {
+                    initiator.stop();
+                }
             } finally {
                 dbServer.start();
             }
-
-//            SessionSettings initiatorSettings = createInitiatorSettings(port);
-//            JdbcStoreFactory storeFactory = new JdbcStoreFactory(initiatorSettings);
-//
-//            ThreadedSocketInitiator initiator = new ThreadedSocketInitiator(new ApplicationAdapter(), storeFactory, initiatorSettings, new DefaultMessageFactory());
-//            initiator.start();
-//
-//            try {
-//                Thread.sleep(2_000);
-//                System.out.println("ml_test = " + initiator.isLoggedOn());
-//            } finally {
-//                initiator.stop();
-//            }
         } finally {
             acceptor.stop();
         }
