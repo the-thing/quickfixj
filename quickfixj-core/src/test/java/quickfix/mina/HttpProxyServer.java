@@ -64,7 +64,6 @@ public class HttpProxyServer {
     private final ServerSocketChannel ch;
     private final Deque<Throwable> recordedExceptions = new LinkedBlockingDeque<>();
     private final TestMode testMode;
-    private final int port;
     private final String username;
     private final String password;
     private final InetSocketAddress destination;
@@ -75,7 +74,6 @@ public class HttpProxyServer {
 
     HttpProxyServer(SslContext sslContext, TestMode testMode, int port, InetSocketAddress destination, String username, String password) {
         this.testMode = testMode;
-        this.port = port;
         this.destination = destination;
         this.username = username;
         this.password = password;
