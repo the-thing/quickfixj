@@ -3246,6 +3246,8 @@ public class SessionTest {
             assertEquals(1, state.getNextSenderMsgSeqNum());
             assertEquals(1, state.getNextTargetMsgSeqNum());
             assertEquals(1, application.sessionResets);
+            assertFalse(session.isEnabled());
+            assertFalse(session.isLoggedOn());
         }
     }
 
