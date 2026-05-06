@@ -1951,12 +1951,10 @@ public class Session implements Closeable {
      */
     public void next() throws IOException {
 
-        if (!isEnabled()) {
-            if (isLoggedOn()) {
-                if (!state.isLogoutSent()) {
-                    getLog().onEvent("Initiated logout request");
-                    generateLogout(state.getLogoutReason());
-                }
+        if (!isEnabled() && isLoggedOn()) {
+            if (!state.isLogoutSent()) {
+                getLog().onEvent("Initiated logout request");
+                generateLogout(state.getLogoutReason());
             }
         }
 
