@@ -3,14 +3,16 @@
 
 version: 2
 updates:
-  - package-ecosystem: "maven" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "maven"
+    directory: "/"
     schedule:
       interval: "daily"
     open-pull-requests-limit: 10
+    ignore:
+      - dependency-name: "org.apache.mina:mina-core"
+        versions: ["<= 2.2.4"]  # Override the stale PR-comment ignore; allow any 2.2.5+ security fix
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      # Check for updates to GitHub Actions every weekday
       interval: "daily"
     open-pull-requests-limit: 10
