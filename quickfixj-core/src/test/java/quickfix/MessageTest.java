@@ -1286,16 +1286,13 @@ public class MessageTest {
             System.setProperty(DEFAULT_CONNECT_TIMEOUT_PROPERTY, timeout);
             System.setProperty(DEFAULT_READ_TIMEOUT_PROPERTY, timeout);
 
-            ConfigError lastError = null;
+            ConfigError lastError = new ConfigError("Could not parse data dictionary file");
             for (int retry = 0; retry < EXTERNAL_DTD_LOAD_RETRIES; retry++) {
                 try {
                     return new DataDictionary("FIX_External_DTD.xml", DocumentBuilderFactory::newInstance);
                 } catch (ConfigError e) {
                     lastError = e;
                 }
-            }
-            if (lastError == null) {
-                throw new ConfigError("Could not parse data dictionary file");
             }
             throw lastError;
         } finally {
