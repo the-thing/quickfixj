@@ -1295,7 +1295,7 @@ public class MessageTest {
                     lastError = e;
                     if (attempt < EXTERNAL_DTD_LOAD_RETRIES) {
                         try {
-                            Thread.sleep(EXTERNAL_DTD_RETRY_DELAY_MILLIS);
+                            Thread.sleep((long) attempt * EXTERNAL_DTD_RETRY_DELAY_MILLIS);
                         } catch (InterruptedException interruptedException) {
                             Thread.currentThread().interrupt();
                             throw new ConfigError("Interrupted while retrying FIX_External_DTD.xml load", interruptedException);
