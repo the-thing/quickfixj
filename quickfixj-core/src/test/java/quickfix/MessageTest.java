@@ -1291,7 +1291,8 @@ public class MessageTest {
                 try {
                     return new DataDictionary("FIX_External_DTD.xml", DocumentBuilderFactory::newInstance);
                 } catch (ConfigError e) {
-                    lastError = e;
+                    lastError = new ConfigError("Attempt " + (attempt + 1)
+                            + " failed to load FIX_External_DTD.xml", e);
                 }
             }
             throw lastError;
