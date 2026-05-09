@@ -1292,8 +1292,7 @@ public class MessageTest {
                 try {
                     return new DataDictionary("FIX_External_DTD.xml", DocumentBuilderFactory::newInstance);
                 } catch (ConfigError e) {
-                    lastError = new ConfigError("Attempt " + attempt
-                            + " failed to load FIX_External_DTD.xml", e);
+                    lastError = e;
                     if (attempt < EXTERNAL_DTD_LOAD_RETRIES) {
                         try {
                             Thread.sleep(EXTERNAL_DTD_RETRY_DELAY_MILLIS);
@@ -1304,7 +1303,8 @@ public class MessageTest {
                     }
                 }
             }
-            throw lastError;
+            throw new ConfigError("Failed to load FIX_External_DTD.xml after "
+                    + EXTERNAL_DTD_LOAD_RETRIES + " attempts", lastError);
         } finally {
             restoreSystemProperty(DEFAULT_CONNECT_TIMEOUT_PROPERTY, previousConnectTimeout);
             restoreSystemProperty(DEFAULT_READ_TIMEOUT_PROPERTY, previousReadTimeout);
