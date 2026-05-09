@@ -147,6 +147,7 @@ public class MessageTest {
     private static final String DEFAULT_READ_TIMEOUT_PROPERTY = "sun.net.client.defaultReadTimeout";
     private static final int EXTERNAL_DTD_TIMEOUT_MILLIS = 5000;
     private static final int EXTERNAL_DTD_LOAD_RETRIES = 3;
+    private static final int EXTERNAL_DTD_RETRY_DELAY_MILLIS = 250;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -1293,6 +1294,14 @@ public class MessageTest {
                 } catch (ConfigError e) {
                     lastError = new ConfigError("Attempt " + attempt
                             + " failed to load FIX_External_DTD.xml", e);
+                    if (attempt < EXTERNAL_DTD_LOAD_RETRIES) {
+                        try {
+                            Thread.sleep(EXTERNAL_DTD_RETRY_DELAY_MILLIS);
+                        } catch (InterruptedException interruptedException) {
+                            Thread.currentThread().interrupt();
+                            throw new ConfigError("Interrupted while retrying FIX_External_DTD.xml load", interruptedException);
+                        }
+                    }
                 }
             }
             throw lastError;
