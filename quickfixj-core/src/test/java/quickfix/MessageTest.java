@@ -1269,39 +1269,39 @@ public class MessageTest {
 
     @Test
     public void shouldConvertToXmlWhenDataDictionaryLoadedWithExternalDTD() throws ConfigError {
-        final String previousConnectTimeout = System.getProperty(DEFAULT_CONNECT_TIMEOUT_PROPERTY);
-        final String previousReadTimeout = System.getProperty(DEFAULT_READ_TIMEOUT_PROPERTY);
-        DataDictionary dataDictionary = null;
-        ConfigError lastError = null;
-        try {
-            final String timeout = String.valueOf(EXTERNAL_DTD_TIMEOUT_MILLIS);
-            System.setProperty(DEFAULT_CONNECT_TIMEOUT_PROPERTY, timeout);
-            System.setProperty(DEFAULT_READ_TIMEOUT_PROPERTY, timeout);
-
-            for (int attempt = 1; attempt <= EXTERNAL_DTD_LOAD_RETRIES; attempt++) {
-                try {
-                    dataDictionary = new DataDictionary("FIX_External_DTD.xml", DocumentBuilderFactory::newInstance);
-                    lastError = null;
-                    break;
-                } catch (ConfigError e) {
-                    lastError = e;
-                }
-            }
-        } finally {
-            restoreSystemProperty(DEFAULT_CONNECT_TIMEOUT_PROPERTY, previousConnectTimeout);
-            restoreSystemProperty(DEFAULT_READ_TIMEOUT_PROPERTY, previousReadTimeout);
-        }
-
-        if (lastError != null) {
-            throw lastError;
-        }
-
+        DataDictionary dataDictionary = loadDataDictionaryWithExternalDtdRetry();
         Message message = new Message();
         message.setString(Account.FIELD, "test-account");
 
         String xml = message.toXML(dataDictionary);
         xml = xml.replace("\r", "").replace("\n", "").replaceAll(">\\s+<", "><");
         assertEquals("<?xml version=\"1.0\" encoding=\"ISO-8859-1\" standalone=\"no\"?><message><header/><body><field name=\"Account\" tag=\"1\"><![CDATA[test-account]]></field></body><trailer/></message>", xml);
+    }
+
+    private DataDictionary loadDataDictionaryWithExternalDtdRetry() throws ConfigError {
+        final String previousConnectTimeout = System.getProperty(DEFAULT_CONNECT_TIMEOUT_PROPERTY);
+        final String previousReadTimeout = System.getProperty(DEFAULT_READ_TIMEOUT_PROPERTY);
+        try {
+            final String timeout = String.valueOf(EXTERNAL_DTD_TIMEOUT_MILLIS);
+            System.setProperty(DEFAULT_CONNECT_TIMEOUT_PROPERTY, timeout);
+            System.setProperty(DEFAULT_READ_TIMEOUT_PROPERTY, timeout);
+
+            ConfigError lastError = null;
+            for (int retry = 0; retry < EXTERNAL_DTD_LOAD_RETRIES; retry++) {
+                try {
+                    return new DataDictionary("FIX_External_DTD.xml", DocumentBuilderFactory::newInstance);
+                } catch (ConfigError e) {
+                    lastError = e;
+                }
+            }
+            if (lastError == null) {
+                throw new ConfigError("Could not parse data dictionary file");
+            }
+            throw lastError;
+        } finally {
+            restoreSystemProperty(DEFAULT_CONNECT_TIMEOUT_PROPERTY, previousConnectTimeout);
+            restoreSystemProperty(DEFAULT_READ_TIMEOUT_PROPERTY, previousReadTimeout);
+        }
     }
 
     private static void restoreSystemProperty(String key, String value) {
