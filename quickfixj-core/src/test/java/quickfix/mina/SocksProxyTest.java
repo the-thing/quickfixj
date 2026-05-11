@@ -44,7 +44,7 @@ public class SocksProxyTest {
 
     @Before
     public void setUp() {
-        LOGGER.info("Starting test {}.{}", getClass().getSimpleName(), testName.getMethodName());
+        LOGGER.info("Starting test {}", getCurrentTestName());
         int proxyPort = AvailablePortFinder.getNextAvailable();
 
         proxyServer = new SocksProxyServer(proxyPort);
@@ -57,7 +57,7 @@ public class SocksProxyTest {
             proxyServer.stop();
         }
 
-        LOGGER.info("Finished test {}.{}", getClass().getSimpleName(), testName.getMethodName());
+        LOGGER.info("Finished test {}", getCurrentTestName());
     }
 
     @Test
@@ -123,6 +123,16 @@ public class SocksProxyTest {
         }
 
         return session.isLoggedOn();
+    }
+
+    private String getCurrentTestName() {
+        String methodName = testName.getMethodName();
+
+        if (methodName == null) {
+            return getClass().getSimpleName();
+        }
+
+        return getClass().getSimpleName() + "." + methodName;
     }
 
     private SessionConnector createAcceptor(int port) throws ConfigError {
