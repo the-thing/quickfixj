@@ -1834,6 +1834,7 @@ public class Session implements Closeable {
                     return false;
                 } else if (checkTooLow && isTargetTooLow(msgSeqNum)) {
                     doTargetTooLow(msg);
+                    stateListener.onPossDupMessageDiscarded(sessionID, msg);
                     return false;
                 }
             }
@@ -1874,7 +1875,7 @@ public class Session implements Closeable {
         return true;
     }
 
-    private boolean doTargetTooLow(Message msg) throws FieldNotFound, IOException {
+    private void doTargetTooLow(Message msg) throws FieldNotFound, IOException {
         if (!isPossibleDuplicate(msg)) {
             final int msgSeqNum = msg.getHeader().getInt(MsgSeqNum.FIELD);
             final String text = "MsgSeqNum too low, expecting " + getExpectedTargetNum()
@@ -1882,9 +1883,7 @@ public class Session implements Closeable {
             generateLogout(text);
             throw new SessionException(text);
         }
-        final boolean validPossDup = validatePossDup(msg);
-        stateListener.onPossDupMessageDiscarded(sessionID, msg);
-        return validPossDup;
+        validatePossDup(msg);
     }
 
     private void doBadCompID(Message msg) throws IOException, FieldNotFound {
